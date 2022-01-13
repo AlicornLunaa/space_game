@@ -30,14 +30,17 @@ dirs:
 	mkdir -p $(OBJDIR)
 
 # Builds the app
-$(APPNAME): obj/main.o obj/objects.o obj/util.o
+$(APPNAME): obj/main.o obj/vehicle.o obj/player.o obj/util.o
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Builds every object
 obj/main.o: src/main.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 	
-obj/objects.o: src/objects/ship.cpp
+obj/vehicle.o: src/objects/vehicle.cpp
+	$(CC) $(CXXFLAGS) -o $@ -c $^
+	
+obj/player.o: src/objects/player.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 
 obj/util.o: src/util/debugger.cpp

@@ -1,7 +1,8 @@
-#include "ship.h"
-using namespace Objects;
+#include "vehicle.h"
+using namespace Vehicles;
 
-Ship::Ship(unsigned int width, unsigned int height, unsigned int scale){
+// Base class
+Vehicle::Vehicle(unsigned int width, unsigned int height, unsigned int scale){
     // Initialize a ship
     setOrigin(sf::Vector2f(width, height) * (float)scale * 0.5f);
     setSize(sf::Vector2f(width, height) * (float)scale);
@@ -13,14 +14,22 @@ Ship::Ship(unsigned int width, unsigned int height, unsigned int scale){
     setTextureRect(sf::IntRect(0, 0, width, height));
 }
 
-Ship::~Ship(){}
+Vehicle::~Vehicle(){}
 
-void Ship::updateTexture(){
+void Vehicle::updateTexture(){
     // Reset the texture
     texture.loadFromImage(body);
 }
 
+
+// Ship vehicle
+Ship::Ship(unsigned int width, unsigned int height, unsigned int scale) : Vehicle(width, height, scale){
+    // Initialize a ship
+}
+
+Ship::~Ship(){}
+
 void Ship::update(float deltaTime){
     // Update physics
-
+    
 }

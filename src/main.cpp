@@ -1,5 +1,7 @@
 #include <SFML/Graphics.hpp>
-#include "objects/ship.h"
+
+#include "objects/player.h"
+#include "objects/vehicle.h"
 #include "util/debugger.h"
 
 int main(int argc, char** argv){
@@ -12,8 +14,9 @@ int main(int argc, char** argv){
     
     std::string debugText;
 
-    Objects::Ship playerShip(10, 25, 4);
-    playerShip.setPosition(500, 250);
+    Objects::Player player(1280/2, 720/2);
+    Vehicles::Ship shipVehicle(10, 25, 4);
+    shipVehicle.setPosition(500, 250);
 
     while(window.isOpen()){
         // Get delta time
@@ -35,13 +38,12 @@ int main(int argc, char** argv){
         }
 
         // Physics
-        playerShip.update(deltaTime);
+        player.update(deltaTime);
 
         // Rendering
         window.clear();
-        window.draw(playerShip);
-        Debug::drawText(10, 10, debugText, 16u, sf::Color::Yellow);
-        Debug::drawLine(10, 10, 500, 500, sf::Color::Green);
+        player.render(&window);
+        Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
         window.display();
     }
 
