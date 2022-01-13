@@ -18,7 +18,7 @@ SRC = $(wildcard $(SRCDIR)/*$(EXT))
 OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
 DEP = $(OBJ:$(OBJDIR)/%.o=%.d)
 # UNIX-based OS variables & settings
-RM = rm -r
+RM = rm
 DELOBJ = $(OBJ)
 # Windows OS variables & settings
 DEL = del
@@ -50,7 +50,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%$(EXT)
 # Cleans complete project
 .PHONY: clean
 clean:
-	$(RM) $(DELOBJ) $(DEP) $(APPNAME) $(OBJDIR)
+	$(RM) $(DELOBJ) $(DEP) $(APPNAME)
 
 # Cleans only all files with the extension .d
 .PHONY: cleandep

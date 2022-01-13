@@ -6,6 +6,8 @@ Ship::Ship(unsigned int width, unsigned int height, unsigned int scale){
     setOrigin(sf::Vector2f(width, height) * (float)scale * 0.5f);
     setSize(sf::Vector2f(width, height) * (float)scale);
 
+    body.create(width, height, sf::Color::White);
+
     updateTexture();
     setTexture(&texture);
     setTextureRect(sf::IntRect(0, 0, width, height));
