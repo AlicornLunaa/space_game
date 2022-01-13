@@ -32,6 +32,16 @@ int main(int argc, char** argv){
                 window.close();
                 break;
 
+            case sf::Event::KeyPressed:
+                if(e.key.code == sf::Keyboard::R){
+                    if(player.isDriving()){
+                        player.drive(nullptr);
+                    } else {
+                        player.drive(&shipVehicle);
+                    }
+                }
+                break;
+
             default:
                 break;
             }

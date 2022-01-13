@@ -4,6 +4,8 @@
  * @brief Holds the data and controls the keyboard and inputs
  */
 #pragma once
+#include <cmath>
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include "vehicle.h"
 
@@ -11,7 +13,16 @@ namespace Objects {
     
     class Player : public sf::RectangleShape {
     private:
+        // Variables
+        sf::Texture* texture;
+        sf::Vector2f velocity;
+        float rotVelocity = 0.f;
+
         Vehicles::Vehicle* vehicle;
+
+        // Private functions
+        void updateKeys(float deltaTime);
+        void updateTransform();
 
     public:
         Player(float x, float y);
