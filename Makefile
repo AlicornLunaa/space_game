@@ -4,7 +4,7 @@
 
 # Compiler settings - Can be customized.
 CC = g++
-CXXFLAGS = -std=c++17 -Wall -DSFML_STATIC -I./sfml/include -L./sfml/lib
+CXXFLAGS = -g -std=c++17 -Wall -DSFML_STATIC -I./sfml/include -L./sfml/lib
 LDFLAGS = -lsfml-audio-s -lsfml-graphics-s -lsfml-window-s -lsfml-system-s -lopenal32 -lflac -lvorbisenc -lvorbisfile -lvorbis -logg -lfreetype -lgdi32 -lopengl32 -lwinmm
 
 # Makefile settings - Can be customized.
@@ -16,17 +16,21 @@ OBJDIR = obj
 SRC = $(wildcard $(SRCDIR)/*$(EXT))
 OBJ = $(SRC:$(SRCDIR)/%$(EXT)=$(OBJDIR)/%.o)
 # UNIX-based OS variables & settings
-RM = rm
+RM = rm -r
 DELOBJ = $(OBJ)
 
 ########################################################################
 ####################### Targets beginning here #########################
 ########################################################################
 
-all: $(APPNAME)
+all: dirs $(APPNAME)
+
+# Setup
+dirs:
+	mkdir -p $(OBJDIR)
 
 # Builds the app
-$(APPNAME): obj/main.o obj/objects.o
+$(APPNAME): obj/main.o obj/objects.o obj/util.o
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Builds every object
@@ -36,8 +40,11 @@ obj/main.o: src/main.cpp
 obj/objects.o: src/objects/ship.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 
+obj/util.o: src/util/debugger.cpp
+	$(CC) $(CXXFLAGS) -o $@ -c $^
+
 ################### Cleaning rules for Unix-based OS ###################
 # Cleans complete project
 .PHONY: clean
 clean:
-	$(RM) $(DELOBJ) $(APPNAME)
+	$(RM) $(APPNAME) $(OBJDIR)
