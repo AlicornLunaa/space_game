@@ -31,14 +31,23 @@ void Debug::drawText(float x, float y, std::string text, unsigned int fontSize, 
     window->draw(debugText);
 }
 
-void Debug::drawRect(float x, float y, float width, float height, sf::Color color){
+void Debug::drawRect(float x, float y, float width, float height, sf::Color color, bool outline, float rotation){
     // Make sure window exists
     assert(window != nullptr);
 
     // Set rectangle properties
     debugRect.setPosition(x, y);
     debugRect.setSize(sf::Vector2f(width, height));
-    debugRect.setFillColor(color);
+    debugRect.setRotation(rotation);
+
+    if(outline){
+        debugRect.setOutlineColor(color);
+        debugRect.setOutlineThickness(1.f);
+        debugRect.setFillColor(sf::Color(0, 0, 0, 0));
+    } else {
+        debugRect.setOutlineThickness(0.f);
+        debugRect.setFillColor(color);
+    }
 
     window->draw(debugRect);
 }

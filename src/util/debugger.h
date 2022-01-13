@@ -48,7 +48,7 @@ public:
      * @param height The height of the rectangle being drawn
      * @param color The color to draw the rectangle with
      */
-    static void drawRect(float x, float y, float width, float height, sf::Color color = sf::Color::White);
+    static void drawRect(float x, float y, float width, float height, sf::Color color = sf::Color::White, bool outline = false, float rotation = 0.f);
 
     /**
      * @brief Draws a line from point A to point B using the given color

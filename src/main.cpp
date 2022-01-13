@@ -54,6 +54,7 @@ int main(int argc, char** argv){
         window.clear();
         player.render(&window);
         Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
+        Debug::drawRect(42, 68, 20, 20, sf::Color::Red, false);
         window.display();
     }
 
