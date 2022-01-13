@@ -21,7 +21,6 @@ void Vehicle::updateTexture(){
     texture.loadFromImage(body);
 }
 
-
 // Ship vehicle
 Ship::Ship(unsigned int width, unsigned int height, unsigned int scale) : Vehicle(width, height, scale){
     // Initialize a ship

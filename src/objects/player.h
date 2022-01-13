@@ -18,6 +18,7 @@ namespace Objects {
         sf::Vector2f velocity;
         float rotVelocity = 0.f;
 
+        bool driving;
         Vehicles::Vehicle* vehicle;
 
         // Private functions
