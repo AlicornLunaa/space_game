@@ -30,7 +30,7 @@ dirs:
 	mkdir -p $(OBJDIR)
 
 # Builds the app
-$(APPNAME): obj/main.o obj/vehicle.o obj/player.o obj/debugger.o
+$(APPNAME): obj/main.o obj/engine.o obj/rigidbody.o obj/collider.o obj/vehicle.o obj/player.o obj/debugger.o
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Builds every object
@@ -44,6 +44,15 @@ obj/player.o: src/objects/player.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 
 obj/debugger.o: src/util/debugger.cpp
+	$(CC) $(CXXFLAGS) -o $@ -c $^
+
+obj/collider.o: src/phys/collider.cpp
+	$(CC) $(CXXFLAGS) -o $@ -c $^
+
+obj/rigidbody.o: src/phys/rigidbody.cpp
+	$(CC) $(CXXFLAGS) -o $@ -c $^
+
+obj/engine.o: src/phys/engine.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 
 ################### Cleaning rules for Unix-based OS ###################

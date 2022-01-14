@@ -1,7 +1,6 @@
 #include <SFML/Graphics.hpp>
 
-#include "objects/player.h"
-#include "objects/vehicle.h"
+#include "phys/engine.h"
 #include "util/debugger.h"
 
 int main(int argc, char** argv){
@@ -11,12 +10,11 @@ int main(int argc, char** argv){
     Debug::init(&window);
     sf::Clock deltaClock;
     float deltaTime;
-    
     std::string debugText;
-
-    Objects::Player player(1280/2, 720/2);
-    Vehicles::Ship shipVehicle(10, 25, 4);
-    shipVehicle.setPosition(500, 250);
+    
+    Phys::Engine engine;
+    Phys::Collider c1(50, 50, 0);
+    Phys::Collider c2(150, 50, 0);
 
     while(window.isOpen()){
         // Get delta time
@@ -32,29 +30,18 @@ int main(int argc, char** argv){
                 window.close();
                 break;
 
-            case sf::Event::KeyPressed:
-                if(e.key.code == sf::Keyboard::R){
-                    if(player.isDriving()){
-                        player.drive(nullptr);
-                    } else {
-                        player.drive(&shipVehicle);
-                    }
-                }
-                break;
-
             default:
                 break;
             }
         }
 
         // Physics
-        player.update(deltaTime);
+        engine.update(deltaTime);
 
         // Rendering
         window.clear();
-        player.render(&window);
+        window.draw(engine);
         Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
-        Debug::drawRect(42, 68, 20, 20, sf::Color::Red, false);
         window.display();
     }
 
