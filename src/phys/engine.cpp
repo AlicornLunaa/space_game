@@ -51,12 +51,14 @@ void Engine::draw(sf::RenderTarget& target, sf::RenderStates states) const {
 
     for(Collider* c : colliders){
         // Draw lines
-        sf::Vector2f lastPoint = c->getPoint(0);
+        sf::Vector2f lastPoint = c->getPointGlobal(0);
 
         for(unsigned int i = 1; i < c->getPointCount(); i++){
-            sf::Vector2f p = c->getPoint(i);
-            Debug::drawLine(lastPoint.x, lastPoint.y, p.x, p.y);
+            sf::Vector2f p = c->getPointGlobal(i);
+            Debug::drawLine(lastPoint.x, lastPoint.y, p.x, p.y, sf::Color::Green);
             lastPoint = p;
         }
+        
+        Debug::drawLine(lastPoint.x, lastPoint.y, c->getPointGlobal(0).x, c->getPointGlobal(0).y, sf::Color::Green);
     }
 }

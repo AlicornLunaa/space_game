@@ -13,8 +13,8 @@ int main(int argc, char** argv){
     std::string debugText;
     
     Phys::Engine engine;
-    Phys::Collider c1(50, 50, 0);
-    Phys::Collider c2(150, 50, 0);
+    int c1 = engine.registerCollider(new Phys::BoxCollider(150, 250, 100, 50));
+    int c2 = engine.registerCollider(new Phys::BoxCollider(450, 250, 50, 100));
 
     while(window.isOpen()){
         // Get delta time
