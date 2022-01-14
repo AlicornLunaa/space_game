@@ -18,6 +18,8 @@ namespace Phys {
         bool renderDebug; // Displays boxes and vectors
 
         // Functions
+        bool collidesAABB(Collider* c1, Collider* c2);
+
         void collisionDetection();
         void collisionResolution();
         void physicsUpdate();
@@ -40,6 +42,13 @@ namespace Phys {
          * @return false Collider does not exist
          */
         bool unregisterCollider(unsigned int id);
+
+        /**
+         * @brief Get the Collider object
+         * @param id 
+         * @return Collider* 
+         */
+        Collider* getCollider(unsigned int id);
 
         /**
          * @brief Update the physics objects

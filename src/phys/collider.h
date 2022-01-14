@@ -11,11 +11,14 @@ namespace Phys {
     class Collider : public sf::Transformable {
     private:
         std::vector<sf::Vector2f> points;
+        bool sleeping;
 
     public:
         Collider(float x, float y, float rotation);
         ~Collider();
 
+        bool isSleeping();
+        void setSleeping(bool s);
         void addPoint(float x, float y);
         sf::Vector2f getPoint(unsigned int i);
         sf::Vector2f getPointGlobal(unsigned int i);
