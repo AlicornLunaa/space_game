@@ -17,13 +17,11 @@ bool Engine::collidesAABB(Collider* c1, Collider* c2){
     sf::Vector2f p2 = c2->getPosition();
     sf::Vector2f s2 = c2->getScale() * 1.5f;
 
-    if(p1.x - s1.x <= p2.x + s2.x && p1.x + s1.x >= p2.x - s2.x &&
-        p1.y - s1.y <= p2.y + s2.y && p1.y + s1.y >= p2.y - s2.y){
-        c1->setSleeping(false);
-        return true;
-    }
+    return (p1.x - s1.x <= p2.x + s2.x && p1.x + s1.x >= p2.x - s2.x && p1.y - s1.y <= p2.y + s2.y && p1.y + s1.y >= p2.y - s2.y);
+}
 
-    return false;
+bool Engine::collidesSAT(Collider* c1, Collider* c2){
+    return true;
 }
 
 unsigned int Engine::registerCollider(Collider* c){
@@ -46,9 +44,16 @@ void Engine::collisionDetection(){
     // Check all the collisions
     for(unsigned int i = 0; i < colliders.size(); i++){
         for(unsigned int j = 0; j < colliders.size(); j++){
+            // Broadphase
             if(i == j) continue;
+            if(!collidesAABB(colliders[i], colliders[j])) continue;
 
-            collidesAABB(colliders[i], colliders[j]);
+            // Narrow phase
+            if(!collidesSAT(colliders[i], colliders[j])) continue;
+
+            // Collision occured, color it
+            colliders[i]->setSleeping(false);
+            colliders[j]->setSleeping(false);
         }
     }
 }
