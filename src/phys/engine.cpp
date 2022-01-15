@@ -121,6 +121,10 @@ Collider* Engine::getCollider(unsigned int id){
     return colliders[id];
 }
 
+RigidBody* Engine::getRigidBody(unsigned int id){
+    return dynamic_cast<RigidBody*>(colliders[id]);
+}
+
 void Engine::collisionDetection(){
     // Check all the collisions
     for(unsigned int i = 0; i < colliders.size(); i++){
@@ -141,15 +145,38 @@ void Engine::collisionResolution(){
         c.c1->move(c.displacement * -0.5f * c.c1->getSpringForce());
         c.c2->move(c.displacement * 0.5f * c.c2->getSpringForce());
 
+        // Check if the collider is also a rigidbody
+        RigidBody* r1 = dynamic_cast<RigidBody*>(c.c1);
+        RigidBody* r2 = dynamic_cast<RigidBody*>(c.c2);
+
         // Update velocities
-        
+        if(r1 != NULL){
+            r1->velocity *= 0.f;
+        }
+
+        if(r2 != NULL){
+            r2->velocity *= 0.f;
+        }
     }
 
     collisions.clear();
 }
 
 void Engine::physicsUpdate(){
+    // Update each body
+    for(Collider* c : colliders){
+        // Update only rigidbodies
+        RigidBody* rb = dynamic_cast<RigidBody*>(c);
+        if(rb == NULL) continue;
 
+        // Update position and other variables
+        rb->velocity += rb->acceleration;
+        rb->rotVelocity += rb->rotAcceleration;
+        rb->move(rb->velocity);
+        rb->rotate(rb->rotVelocity);
+        rb->acceleration *= 0.f;
+        rb->rotAcceleration *= 0.f;
+    }
 }
 
 void Engine::update(float deltaTime){

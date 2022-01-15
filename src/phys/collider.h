@@ -3,6 +3,7 @@
  * @author Luna
  * @brief A collider contains the data for the collision bounds
  */
+#pragma once
 #include <vector>
 #include <SFML/Graphics.hpp>
 

@@ -3,9 +3,11 @@
  * @author Luna
  * @brief A collider contains the data for the collision bounds
  */
+#pragma once
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "collider.h"
+#include "rigidbody.h"
 #include "../util/debugger.h"
 #include "../util/vec_math.h"
 
@@ -52,6 +54,13 @@ namespace Phys {
          * @return Collider* 
          */
         Collider* getCollider(unsigned int id);
+
+        /**
+         * @brief Get the RigidBody object
+         * @param id 
+         * @return RigidBody* 
+         */
+        RigidBody* getRigidBody(unsigned int id);
 
         /**
          * @brief Update the physics objects

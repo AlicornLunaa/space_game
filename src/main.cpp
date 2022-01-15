@@ -13,9 +13,9 @@ int main(int argc, char** argv){
     std::string debugText;
     
     Phys::Engine engine;
-    int c1 = engine.registerCollider(new Phys::BoxCollider(320, 250, 100, 50));
-    int c2 = engine.registerCollider(new Phys::BoxCollider(450, 250, 50, 100));
-    engine.getCollider(c2)->setSpringForce(0.f);
+    int c1 = engine.registerCollider(new Phys::BoxRigidBody(320, 250, 100, 50));
+    int c2 = engine.registerCollider(new Phys::BoxRigidBody(450, 250, 50, 100));
+    engine.getRigidBody(c2)->setSpringForce(0.f);
 
     while(window.isOpen()){
         // Get delta time
@@ -37,12 +37,12 @@ int main(int argc, char** argv){
         }
 
         // Controls
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ engine.getCollider(c1)->move(-100 * deltaTime, 0); }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ engine.getCollider(c1)->move(100 * deltaTime, 0); }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ engine.getCollider(c1)->move(0, -100 * deltaTime); }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ engine.getCollider(c1)->move(0, 100 * deltaTime); }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ engine.getCollider(c1)->rotate(50 * deltaTime); }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ engine.getCollider(c1)->rotate(-50 * deltaTime); }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ engine.getRigidBody(c1)->acceleration.x = -10 * deltaTime; }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ engine.getRigidBody(c1)->acceleration.x = 10 * deltaTime; }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ engine.getRigidBody(c1)->acceleration.y = -10 * deltaTime; }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ engine.getRigidBody(c1)->acceleration.y = 10 * deltaTime; }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ engine.getRigidBody(c1)->rotAcceleration = 5 * deltaTime; }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ engine.getRigidBody(c1)->rotAcceleration = -5 * deltaTime; }
 
         // Physics
         window.clear();
