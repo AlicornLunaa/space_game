@@ -28,7 +28,6 @@ bool Engine::collidesSAT(Collider* c1, Collider* c2){
             // Get the edge of the face
             sf::Vector2f edge = (i == c1->getPointCount() - 1) ? (c1->getPointGlobal(0) - c1->getPointGlobal(i)) : (c1->getPointGlobal(i + 1) - c1->getPointGlobal(i));
             sf::Vector2f normal = Math::perpendicular(Math::normalize(edge));
-            Debug::drawLine(c1->getPosition().x, c1->getPosition().y, c1->getPosition().x + normal.x * 15, c1->getPosition().y + normal.y * 15);
 
             // Edge data
             float min1 = INFINITY;
@@ -42,8 +41,6 @@ bool Engine::collidesSAT(Collider* c1, Collider* c2){
                 float proj = Math::dot(c1->getPointGlobal(j), normal);
                 min1 = std::min(proj, min1);
                 max1 = std::max(proj, max1);
-
-                Debug::drawPoint((normal * proj).x, (normal * proj).y, 2.f, sf::Color::Cyan);
             }
             
             for(unsigned int j = 0; j < c2->getPointCount(); j++){
@@ -51,8 +48,6 @@ bool Engine::collidesSAT(Collider* c1, Collider* c2){
                 float proj = Math::dot(c2->getPointGlobal(j), normal);
                 min2 = std::min(proj, min2);
                 max2 = std::max(proj, max2);
-
-                Debug::drawPoint((normal * proj).x, (normal * proj).y, 2.f, sf::Color::Magenta);
             }
 
             // Check collision
@@ -84,15 +79,15 @@ Collider* Engine::getCollider(unsigned int id){
 void Engine::collisionDetection(){
     // Check all the collisions
     for(unsigned int i = 0; i < colliders.size(); i++){
-        for(unsigned int j = 0; j < colliders.size(); j++){
+        for(unsigned int j = i + 1; j < colliders.size(); j++){
             // Broadphase
-            if(i == j) continue;
-            //if(!collidesAABB(colliders[i], colliders[j])) continue;
+            if(!collidesAABB(colliders[i], colliders[j])) continue;
 
             // Narrow phase
             if(!collidesSAT(colliders[i], colliders[j])) continue;
 
-            // Collision occured, color it
+            // Collision occured, record it
+            collisions.push_back({ colliders[i], colliders[j], sf::Vector2f(0, 1) });
             colliders[i]->setSleeping(false);
             colliders[j]->setSleeping(false);
         }
@@ -102,7 +97,7 @@ void Engine::collisionDetection(){
 void Engine::collisionResolution(){
     // Fix all the collisions
     for(CollisionData& c : collisions){
-
+        
     }
 
     collisions.empty();
