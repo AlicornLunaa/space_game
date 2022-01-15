@@ -21,8 +21,13 @@ bool Engine::collidesAABB(Collider* c1, Collider* c2){
 }
 
 bool Engine::collidesDIAG(Collider* c1, Collider* c2){
+    // Extract data
+    CollisionData data = { c1, c2, sf::Vector2f(0, 1), sf::Vector2f(0, 0), -1 };
+
     // Define function
-    auto check = [](Collider* c1, Collider* c2){
+    auto check = [](Collider* c1, Collider* c2, CollisionData& data){
+        bool c = false;
+
         // Loop through every diagonal
         for(unsigned int i = 0; i < c1->getPointCount(); i++){
             // Get the edge of the face
@@ -41,15 +46,27 @@ bool Engine::collidesDIAG(Collider* c1, Collider* c2){
 
                 // Check collision
                 if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
-                    return true;
+                    data.c1 = c1;
+                    data.c2 = c2;
+                    data.normal = Math::perpendicular(Math::normalize(end2 - start2));
+                    data.displacement.x += (1.f - t1) * (end1.x - start1.x);
+                    data.displacement.y += (1.f - t1) * (end1.y - start1.y);
+                    data.contactPoint = i;
+                    c = true;
                 }
             }
         }
 
-        return false;
+        return c;
     };
 
-    return check(c1, c2) || check(c2, c1);
+    bool collided = check(c1, c2, data) || check(c2, c1, data);
+    
+    if(collided){
+        collisions.push_back(data);
+    }
+
+    return collided;
 }
 
 bool Engine::collidesSAT(Collider* c1, Collider* c2){
@@ -117,11 +134,6 @@ void Engine::collisionDetection(){
 
             // Narrow phase
             if(!collidesDIAG(colliders[i], colliders[j])) continue;
-
-            // Collision occured, record it
-            collisions.push_back({ colliders[i], colliders[j], sf::Vector2f(0, 1) });
-            colliders[i]->setSleeping(false);
-            colliders[j]->setSleeping(false);
         }
     }
 }
@@ -129,10 +141,12 @@ void Engine::collisionDetection(){
 void Engine::collisionResolution(){
     // Fix all the collisions
     for(CollisionData& c : collisions){
-        
+        // Solve collision
+        c.c1->move(c.displacement * -0.5f);
+        c.c2->move(c.displacement * 0.5f);
     }
 
-    collisions.empty();
+    collisions.clear();
 }
 
 void Engine::physicsUpdate(){
