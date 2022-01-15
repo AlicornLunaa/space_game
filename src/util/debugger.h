@@ -21,6 +21,7 @@ private:
     static sf::Font debugFont;
     static sf::Text debugText;
     static sf::RectangleShape debugRect;
+    static sf::CircleShape debugCirc;
 
 public:
     /**
@@ -60,4 +61,14 @@ public:
      * @param color The color to draw the line with
      */
     static void drawLine(float x1, float y1, float x2, float y2, sf::Color color = sf::Color::White);
+
+    /**
+     * @brief Draws a point at the position given
+     * 
+     * @param x X position of the point
+     * @param y Y position of the point
+     * @param radius The radius of the point to draw
+     * @param color The color of the point
+     */
+    static void drawPoint(float x, float y, float radius = 2.f, sf::Color color = sf::Color::White);
 };

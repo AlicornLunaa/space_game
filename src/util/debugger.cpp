@@ -7,6 +7,7 @@ sf::RenderWindow* Debug::window = nullptr;
 sf::Font Debug::debugFont;
 sf::Text Debug::debugText;
 sf::RectangleShape Debug::debugRect;
+sf::CircleShape Debug::debugCirc;
 
 void Debug::init(sf::RenderWindow* window){
     // Load fonts and objects
@@ -63,4 +64,16 @@ void Debug::drawLine(float x1, float y1, float x2, float y2, sf::Color color){
     };
 
     window->draw(line, 2, sf::Lines);
+}
+
+void Debug::drawPoint(float x, float y, float radius, sf::Color color){
+    // Make sure window exists
+    assert(window != nullptr);
+
+    // Get circle propertires
+    debugCirc.setPosition(x, y);
+    debugCirc.setRadius(radius);
+    debugCirc.setFillColor(color);
+
+    window->draw(debugCirc);
 }

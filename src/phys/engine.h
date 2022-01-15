@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include "collider.h"
 #include "../util/debugger.h"
+#include "../util/vec_math.h"
 
 namespace Phys {
 

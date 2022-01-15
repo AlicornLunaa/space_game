@@ -3,6 +3,7 @@
  * @author Luna
  * @brief Mathematical functions for sfml vectors
  */
+#include <cmath>
 #include <SFML/System.hpp>
 
 namespace Math {
@@ -21,5 +22,19 @@ namespace Math {
      * @return sf::Vector2f 
      */
     sf::Vector2f perpendicular(sf::Vector2f v);
+
+    /**
+     * @brief Returns a magnitude for the vector v
+     * @param v 
+     * @return float 
+     */
+    float magnitude(sf::Vector2f v);
+
+    /**
+     * @brief Returns normalized version of the vector v
+     * @param v 
+     * @return sf::Vector2f 
+     */
+    sf::Vector2f normalize(sf::Vector2f v);
 
 }

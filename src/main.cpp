@@ -40,12 +40,14 @@ int main(int argc, char** argv){
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ engine.getCollider(c1)->move(100 * deltaTime, 0); }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ engine.getCollider(c1)->move(0, -100 * deltaTime); }
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ engine.getCollider(c1)->move(0, 100 * deltaTime); }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ engine.getCollider(c1)->rotate(50 * deltaTime); }
+        if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ engine.getCollider(c1)->rotate(-50 * deltaTime); }
 
         // Physics
+        window.clear();
         engine.update(deltaTime);
 
         // Rendering
-        window.clear();
         window.draw(engine);
         Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
         window.display();
