@@ -15,6 +15,7 @@ int main(int argc, char** argv){
     Phys::Engine engine;
     int c1 = engine.registerCollider(new Phys::BoxCollider(320, 250, 100, 50));
     int c2 = engine.registerCollider(new Phys::BoxCollider(450, 250, 50, 100));
+    engine.getCollider(c2)->setSpringForce(0.f);
 
     while(window.isOpen()){
         // Get delta time

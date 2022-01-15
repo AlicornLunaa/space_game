@@ -22,12 +22,11 @@ bool Engine::collidesAABB(Collider* c1, Collider* c2){
 
 bool Engine::collidesDIAG(Collider* c1, Collider* c2){
     // Extract data
-    CollisionData data = { c1, c2, sf::Vector2f(0, 1), sf::Vector2f(0, 0), -1 };
+    CollisionData data1 = { c1, c2, sf::Vector2f(0, 0), sf::Vector2f(0, 0), 0 };
+    CollisionData data2 = { c2, c1, sf::Vector2f(0, 0), sf::Vector2f(0, 0), 0 };
 
     // Define function
     auto check = [](Collider* c1, Collider* c2, CollisionData& data){
-        bool c = false;
-
         // Loop through every diagonal
         for(unsigned int i = 0; i < c1->getPointCount(); i++){
             // Get the edge of the face
@@ -46,24 +45,21 @@ bool Engine::collidesDIAG(Collider* c1, Collider* c2){
 
                 // Check collision
                 if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
-                    data.c1 = c1;
-                    data.c2 = c2;
                     data.normal = Math::perpendicular(Math::normalize(end2 - start2));
-                    data.displacement.x += (1.f - t1) * (end1.x - start1.x);
-                    data.displacement.y += (1.f - t1) * (end1.y - start1.y);
+                    data.displacement += (1.f - t1) * data.normal;
                     data.contactPoint = i;
-                    c = true;
                 }
             }
         }
 
-        return c;
+        return data.normal.x != 0 || data.normal.y != 0;
     };
 
-    bool collided = check(c1, c2, data) || check(c2, c1, data);
+    bool collided = check(c1, c2, data1) | check(c2, c1, data2);
     
     if(collided){
-        collisions.push_back(data);
+        collisions.push_back(data1);
+        collisions.push_back(data2);
     }
 
     return collided;
@@ -142,8 +138,11 @@ void Engine::collisionResolution(){
     // Fix all the collisions
     for(CollisionData& c : collisions){
         // Solve collision
-        c.c1->move(c.displacement * -0.5f);
-        c.c2->move(c.displacement * 0.5f);
+        c.c1->move(c.displacement * -0.5f * c.c1->getSpringForce());
+        c.c2->move(c.displacement * 0.5f * c.c2->getSpringForce());
+
+        // Update velocities
+        
     }
 
     collisions.clear();

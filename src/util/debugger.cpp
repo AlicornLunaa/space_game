@@ -73,6 +73,7 @@ void Debug::drawPoint(float x, float y, float radius, sf::Color color){
     // Get circle propertires
     debugCirc.setPosition(x, y);
     debugCirc.setRadius(radius);
+    debugCirc.setOrigin(radius / 2, radius / 2);
     debugCirc.setFillColor(color);
 
     window->draw(debugCirc);

@@ -12,6 +12,7 @@ namespace Phys {
     private:
         std::vector<sf::Vector2f> points;
         bool sleeping;
+        float springForce;
 
     public:
         Collider(float x, float y, float rotation);
@@ -19,6 +20,8 @@ namespace Phys {
 
         bool isSleeping();
         void setSleeping(bool s);
+        float getSpringForce();
+        void setSpringForce(float s);
         void addPoint(float x, float y);
         sf::Vector2f getPoint(unsigned int i);
         sf::Vector2f getPointGlobal(unsigned int i);
