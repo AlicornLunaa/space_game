@@ -20,6 +20,38 @@ bool Engine::collidesAABB(Collider* c1, Collider* c2){
     return (p1.x - s1.x <= p2.x + s2.x && p1.x + s1.x >= p2.x - s2.x && p1.y - s1.y <= p2.y + s2.y && p1.y + s1.y >= p2.y - s2.y);
 }
 
+bool Engine::collidesDIAG(Collider* c1, Collider* c2){
+    // Define function
+    auto check = [](Collider* c1, Collider* c2){
+        // Loop through every diagonal
+        for(unsigned int i = 0; i < c1->getPointCount(); i++){
+            // Get the edge of the face
+            sf::Vector2f start1 = c1->getPosition();
+            sf::Vector2f end1 = c1->getPointGlobal(i);
+            
+            // Get edge of other faces
+            for(unsigned int j = 0; j < c2->getPointCount(); j++){
+                // Edges
+                sf::Vector2f start2 = c2->getPointGlobal(j);
+                sf::Vector2f end2 = c2->getPointGlobal((j + 1) % c2->getPointCount());
+
+                float h = (end2.x - start2.x) * (start1.y - end1.y) - (start1.x - end1.x) * (end2.y - start2.y);
+                float t1 = ((start2.y - end2.y) * (start1.x - start2.x) + (end2.x - start2.x) * (start1.y - start2.y)) / h;
+                float t2 = ((start1.y - end1.y) * (start1.x - start2.x) + (end1.x - start1.x) * (start1.y - start2.y)) / h;
+
+                // Check collision
+                if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
+    return check(c1, c2) || check(c2, c1);
+}
+
 bool Engine::collidesSAT(Collider* c1, Collider* c2){
     // Define function
     auto check = [](Collider* c1, Collider* c2){
@@ -84,7 +116,7 @@ void Engine::collisionDetection(){
             if(!collidesAABB(colliders[i], colliders[j])) continue;
 
             // Narrow phase
-            if(!collidesSAT(colliders[i], colliders[j])) continue;
+            if(!collidesDIAG(colliders[i], colliders[j])) continue;
 
             // Collision occured, record it
             collisions.push_back({ colliders[i], colliders[j], sf::Vector2f(0, 1) });
