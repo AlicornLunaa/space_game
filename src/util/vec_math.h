@@ -37,4 +37,12 @@ namespace Math {
      */
     sf::Vector2f normalize(sf::Vector2f v);
 
+    /**
+     * @brief Returns a vector reflected over the given vector
+     * @param v Vector getting reflected
+     * @param n Normal
+     * @return sf::Vector2f 
+     */
+    sf::Vector2f reflect(sf::Vector2f v, sf::Vector2f n);
+
 }

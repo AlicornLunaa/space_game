@@ -15,3 +15,9 @@ float Math::magnitude(sf::Vector2f v){
 sf::Vector2f Math::normalize(sf::Vector2f v){
     return v / magnitude(v);
 }
+
+sf::Vector2f Math::reflect(sf::Vector2f v, sf::Vector2f n){
+    sf::Vector2f norm = normalize(n);
+    sf::Vector2f out = 2 * dot(v, norm) * norm - v;
+    return out;
+}
