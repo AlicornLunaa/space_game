@@ -66,6 +66,10 @@ void Debug::drawLine(float x1, float y1, float x2, float y2, sf::Color color){
     window->draw(line, 2, sf::Lines);
 }
 
+void Debug::drawLine(sf::Vector2f v1, sf::Vector2f v2, sf::Color color){
+    drawLine(v1.x, v1.y, v2.x, v2.y, color);
+}
+
 void Debug::drawPoint(float x, float y, float radius, sf::Color color){
     // Make sure window exists
     assert(window != nullptr);
@@ -77,4 +81,8 @@ void Debug::drawPoint(float x, float y, float radius, sf::Color color){
     debugCirc.setFillColor(color);
 
     window->draw(debugCirc);
+}
+
+void Debug::drawPoint(sf::Vector2f v, float radius, sf::Color color){
+    drawPoint(v.x, v.y, radius, color);
 }
