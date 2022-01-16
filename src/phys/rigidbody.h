@@ -15,6 +15,7 @@ namespace Phys {
         sf::Vector2f acceleration;
         float rotVelocity;
         float rotAcceleration;
+        float mass;
 
         RigidBody(float x, float y, float rotation);
         ~RigidBody();

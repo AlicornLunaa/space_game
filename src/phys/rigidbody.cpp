@@ -7,6 +7,7 @@ RigidBody::RigidBody(float x, float y, float rotation) : Collider(x, y, rotation
     acceleration = sf::Vector2f(0.f, 0.f);
     rotVelocity = 0.f;
     rotAcceleration = 0.f;
+    mass = 1.f;
 }
 
 RigidBody::~RigidBody(){}

@@ -31,7 +31,6 @@ bool Engine::collidesSAT(Collider* c1, Collider* c2){
             // Get the edge of the face
             sf::Vector2f p1 = c1->getPointGlobal(i);
             sf::Vector2f p2 = c1->getPointGlobal((i + 1) % c1->getPointCount());
-            sf::Vector2f mid = (p2 + p1) / 2.f;
             sf::Vector2f edge = p2 - p1;
             sf::Vector2f normal = Math::perpendicular(Math::normalize(edge));
 
@@ -105,7 +104,7 @@ void Engine::collisionDetection(){
     for(unsigned int i = 0; i < colliders.size(); i++){
         for(unsigned int j = i + 1; j < colliders.size(); j++){
             // Broadphase
-            //if(!collidesAABB(colliders[i], colliders[j])) continue;
+            if(!collidesAABB(colliders[i], colliders[j])) continue;
 
             // Narrow phase
             if(!collidesSAT(colliders[i], colliders[j])) continue;
@@ -124,8 +123,13 @@ void Engine::collisionResolution(){
         RigidBody* r2 = dynamic_cast<RigidBody*>(c.c2);
 
         // Update velocities
-        if(r1 != NULL){ r1->velocity = Math::reflect(r1->velocity, c.normal) * 0.5f; }
-        if(r2 != NULL){ r2->velocity = Math::reflect(r2->velocity, c.normal) * 0.5f; }
+        if(r1 != NULL){
+            r1->velocity = Math::reflect(r1->velocity, c.normal) * 0.5f;
+        }
+
+        if(r2 != NULL){
+            r2->velocity = Math::reflect(r2->velocity, c.normal) * 0.5f;
+        }
     }
 
     collisions.clear();

@@ -4,6 +4,7 @@
  * @brief A collider contains the data for the collision bounds
  */
 #pragma once
+#include <cmath>
 #include <vector>
 #include <SFML/Graphics.hpp>
 
@@ -13,6 +14,7 @@ namespace Phys {
     private:
         std::vector<sf::Vector2f> points;
         bool sleeping;
+        bool enabled;
         float springForce;
 
     public:
@@ -27,6 +29,7 @@ namespace Phys {
         sf::Vector2f getPoint(unsigned int i);
         sf::Vector2f getPointGlobal(unsigned int i);
         unsigned int getPointCount();
+        sf::Vector2f getUp();
     };
 
     class BoxCollider : public Collider {

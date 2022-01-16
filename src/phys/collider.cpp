@@ -6,6 +6,7 @@ Collider::Collider(float x, float y, float rotation){
     setPosition(x, y);
     setRotation(rotation);
     sleeping = true;
+    enabled = true;
     springForce = 50.f;
 }
 
@@ -22,6 +23,10 @@ unsigned int Collider::getPointCount(){ return points.size(); }
 sf::Vector2f Collider::getPointGlobal(unsigned int i){
     sf::Transform t = getTransform();
     return t.transformPoint(getPoint(i));
+}
+
+sf::Vector2f Collider::getUp(){
+    return sf::Vector2f(std::cos((getRotation() - 90) * (3.1415 / 180)), std::sin((getRotation() - 90) * (3.1415 / 180)));
 }
 
 
