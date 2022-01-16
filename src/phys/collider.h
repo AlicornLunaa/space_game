@@ -38,7 +38,7 @@ namespace Phys {
         Collider* c1;
         Collider* c2;
         sf::Vector2f normal;
-        sf::Vector2f displacement;
+        float displacement;
         unsigned int contactPoint;
     };
 

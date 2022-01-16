@@ -20,71 +20,18 @@ bool Engine::collidesAABB(Collider* c1, Collider* c2){
     return (p1.x - s1.x <= p2.x + s2.x && p1.x + s1.x >= p2.x - s2.x && p1.y - s1.y <= p2.y + s2.y && p1.y + s1.y >= p2.y - s2.y);
 }
 
-bool Engine::collidesDIAG(Collider* c1, Collider* c2){
-    // Extract data
-    CollisionData data1 = { c1, c2, sf::Vector2f(0, 1), sf::Vector2f(0, 0), 0 };
-    CollisionData data2 = { c2, c1, sf::Vector2f(0, 1), sf::Vector2f(0, 0), 0 };
-
-    // Define function
-    auto check = [](Collider* c1, Collider* c2, CollisionData& data, float adj){
-        // Loop through every diagonal
-        for(unsigned int i = 0; i < c1->getPointCount(); i++){
-            // Get the edge of the face
-            sf::Vector2f start1 = c1->getPosition();
-            sf::Vector2f end1 = c1->getPointGlobal(i);
-            sf::Vector2f displacement(0, 0);
-            
-            // Get edge of other faces
-            for(unsigned int j = 0; j < c2->getPointCount(); j++){
-                // Edges
-                sf::Vector2f start2 = c2->getPointGlobal(j);
-                sf::Vector2f end2 = c2->getPointGlobal((j + 1) % c2->getPointCount());
-
-                float h = (end2.x - start2.x) * (start1.y - end1.y) - (start1.x - end1.x) * (end2.y - start2.y);
-                float t1 = ((start2.y - end2.y) * (start1.x - start2.x) + (end2.x - start2.x) * (start1.y - start2.y)) / h;
-                float t2 = ((start1.y - end1.y) * (start1.x - start2.x) + (end1.x - start1.x) * (start1.y - start2.y)) / h;
-
-                // Check collision
-                if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
-                    data.normal = Math::perpendicular(Math::normalize(end2 - start2));
-                    displacement += (1.f - t1) * (end1 - start1);
-                    data.contactPoint = i;
-                    Debug::drawLine(start1.x, start1.y, end1.x, end1.y);
-                    Debug::drawLine(start1.x, start1.y, start1.x + displacement.x * 50, start1.y + displacement.y * 50, sf::Color::Red);
-                }
-            }
-
-            c1->move(displacement * adj);
-        }
-
-        return data.normal.x != 0 || data.normal.y != 0;
-    };
-
-    bool collided = check(c1, c2, data1, -1.1f) | check(c2, c1, data1, -1.1f);
-    
-    if(collided||true){
-        collisions.push_back(data1);
-    }
-
-    return collided;
-}
-
 bool Engine::collidesSAT(Collider* c1, Collider* c2){
     // Store collision
-    CollisionData data = { c1, c2, sf::Vector2f(0, 0), sf::Vector2f(0, 0), 0 };
+    CollisionData data = { c1, c2, sf::Vector2f(0, 0), INFINITY, 0 };
 
     // Define function
-    auto check = [](Collider* c1, Collider* c2, CollisionData& data){
-        // Prepare for getting data
-        sf::Vector2f shortestDir(0, 0);
-        float overlap = INFINITY;
-
+    auto check = [](Collider* c1, Collider* c2, CollisionData& data, float scalar){
         // Loop through every edge
         for(unsigned int i = 0; i < c1->getPointCount(); i++){
             // Get the edge of the face
             sf::Vector2f p1 = c1->getPointGlobal(i);
             sf::Vector2f p2 = c1->getPointGlobal((i + 1) % c1->getPointCount());
-            sf::Vector2f mid = (p1 + p2) / 2.f;
+            sf::Vector2f mid = (p2 + p1) / 2.f;
             sf::Vector2f edge = p2 - p1;
             sf::Vector2f normal = Math::perpendicular(Math::normalize(edge));
 
@@ -111,24 +58,20 @@ bool Engine::collidesSAT(Collider* c1, Collider* c2){
 
             // Get overlap data to respond
             float currentOverlap = max1 - min2;
-            if(currentOverlap < overlap){
-                shortestDir = normal;
-                overlap = currentOverlap;
+            if(currentOverlap < data.displacement){
+                data.normal = normal * scalar;
+                data.displacement = currentOverlap;
                 data.contactPoint = i;
             }
 
             // Check collision
             if(!(max2 >= min1 && max1 >= min2)) return false;
         }
-        
-        // Save collision data
-        data.normal = shortestDir;
-        data.displacement = shortestDir * overlap;
 
         return true;
     };
 
-    bool collided = check(c1, c2, data) && check(c2, c1, data);
+    bool collided = check(c1, c2, data, 1) && check(c2, c1, data, -1);
     
     if(collided){
         collisions.push_back(data);
@@ -173,16 +116,16 @@ void Engine::collisionDetection(){
 void Engine::collisionResolution(){
     // Fix all the collisions
     for(CollisionData& c : collisions){
-        // Solve collision
-        c.c1->move(c.displacement);
+        // Solve collisioN
+        c.c1->move(c.normal * c.displacement * -1.f);
 
         // Check if the collider is also a rigidbody
         RigidBody* r1 = dynamic_cast<RigidBody*>(c.c1);
         RigidBody* r2 = dynamic_cast<RigidBody*>(c.c2);
 
         // Update velocities
-        if(r1 != NULL){ r1->velocity = Math::reflect(r1->velocity, c.normal); }
-        if(r2 != NULL){ r2->velocity = Math::reflect(r2->velocity, c.normal); }
+        if(r1 != NULL){ r1->velocity = Math::reflect(r1->velocity, c.normal) * 0.5f; }
+        if(r2 != NULL){ r2->velocity = Math::reflect(r2->velocity, c.normal) * 0.5f; }
     }
 
     collisions.clear();
