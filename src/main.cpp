@@ -1,6 +1,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "objects/parallax.h"
+#include "objects/player.h"
 #include "phys/engine.h"
 #include "util/debugger.h"
 
@@ -26,6 +27,7 @@ int main(int argc, char** argv){
     sf::View playerCamera(rb.getPosition(), (sf::Vector2f)window.getSize());
 
     Objects::Parallax parallaxEffect(window.getSize().x, window.getSize().y, 8.f);
+    Objects::Player player(engine, 700, 300);
 
     while(window.isOpen()){
         // Get delta time
@@ -51,22 +53,26 @@ int main(int argc, char** argv){
         }
 
         // Controls
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rb.acceleration = rb.getUp() * 6.f * deltaTime; }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rb.acceleration = rb.getUp() * -6.f * deltaTime; }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rb.rotate(-100 * deltaTime); }
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rb.rotate(100 * deltaTime); }
+        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rb.acceleration = rb.getUp() * 6.f * deltaTime; }
+        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rb.acceleration = rb.getUp() * -6.f * deltaTime; }
+        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rb.rotate(-100 * deltaTime); }
+        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rb.rotate(100 * deltaTime); }
 
         // Physics
         window.clear();
+        engine.update(deltaTime);
+        player.update(deltaTime);
 
+        // Hud drawing
         window.setView(hudCamera);
         parallaxEffect.setCameraPosition(rb.getPosition());
         window.draw(parallaxEffect);
         Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
 
+        // World drawing
         window.setView(playerCamera);
-        playerCamera.setCenter(rb.getPosition());
-        engine.update(deltaTime);
+        playerCamera.setCenter(player.getPosition());
+        window.draw(player);
 
         // Rendering
         window.draw(engine);

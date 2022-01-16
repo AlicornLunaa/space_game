@@ -2,49 +2,31 @@
 using namespace Objects;
 
 // Constructors
-Player::Player(float x, float y){
+Player::Player(Phys::Engine& engine, float x, float y){
     // Initialize the player object
+    tex.loadFromFile("./res/textures/player.png");
+    setTexture(&tex);
+
     setPosition(x, y);
     setSize(sf::Vector2f(20, 40));
     setOrigin(getSize() * 0.5f);
-    setFillColor(sf::Color::Cyan);
 
-    texture = new sf::Texture();
-    texture->loadFromFile("./res/textures/player.png");
-    setTexture(texture);
-
-    velocity = sf::Vector2f(0, 0);
-    rotVelocity = 0.f;
+    rigidbody = new Phys::BoxRigidBody(x, y, 20, 40, 0.f);
+    engine.registerCollider(rigidbody);
 
     driving = false;
     vehicle = NULL;
 }
 
-Player::~Player(){
-    delete texture;
-}
+Player::~Player(){}
 
 // Private functions
 void Player::updateKeys(float deltaTime){    
     // Controls
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){
-        rotVelocity += -5 * deltaTime;
-    }
-
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){
-        rotVelocity += 5 * deltaTime;
-    }
-
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){
-        velocity.x += 5 * deltaTime * std::sin(getRotation() * (3.1415 / 180));
-        velocity.y -= 5 * deltaTime * std::cos(getRotation() * (3.1415 / 180));
-    }
-}
-
-void Player::updateTransform(){
-    // Update the position and rotation
-    setPosition(getPosition() + velocity);
-    setRotation(getRotation() + rotVelocity);
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->acceleration = rigidbody->getRight() * -5.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->acceleration = rigidbody->getRight() * 5.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->acceleration = rigidbody->getUp() * 5.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->acceleration = rigidbody->getUp() * -5.f * deltaTime; }
 }
 
 // Vehicle functions
@@ -59,12 +41,14 @@ void Player::update(float deltaTime){
         Vehicles::Vehicle* v = getVehicle();
 
         v->update(deltaTime);
-        setPosition(v->getPosition());
-        setRotation(v->getRotation());
+        rigidbody->setPosition(v->getPosition());
+        rigidbody->setRotation(v->getRotation());
     }
 
     updateKeys(deltaTime);
-    updateTransform();
+
+    setPosition(rigidbody->getPosition());
+    setRotation(rigidbody->getRotation());
 }
 
 // Rendering functions

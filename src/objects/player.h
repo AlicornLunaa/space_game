@@ -7,6 +7,7 @@
 #include <cmath>
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include "../phys/engine.h"
 #include "vehicle.h"
 
 namespace Objects {
@@ -14,19 +15,17 @@ namespace Objects {
     class Player : public sf::RectangleShape {
     private:
         // Variables
-        sf::Texture* texture;
-        sf::Vector2f velocity;
-        float rotVelocity = 0.f;
+        sf::Texture tex;
+        Phys::BoxRigidBody* rigidbody;
 
         bool driving;
         Vehicles::Vehicle* vehicle;
 
         // Private functions
         void updateKeys(float deltaTime);
-        void updateTransform();
 
     public:
-        Player(float x, float y);
+        Player(Phys::Engine& engine, float x, float y);
         ~Player();
 
         // Vehicle functions

@@ -29,6 +29,10 @@ sf::Vector2f Collider::getUp(){
     return sf::Vector2f(std::cos((getRotation() - 90) * (3.1415 / 180)), std::sin((getRotation() - 90) * (3.1415 / 180)));
 }
 
+sf::Vector2f Collider::getRight(){
+    return sf::Vector2f(std::cos(getRotation() * (3.1415 / 180)), std::sin(getRotation() * (3.1415 / 180)));
+}
+
 
 // Box class
 BoxCollider::BoxCollider(float x, float y, float w, float h, float rotation) : Collider(x, y, rotation){

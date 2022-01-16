@@ -30,6 +30,7 @@ namespace Phys {
         sf::Vector2f getPointGlobal(unsigned int i);
         unsigned int getPointCount();
         sf::Vector2f getUp();
+        sf::Vector2f getRight();
     };
 
     class BoxCollider : public Collider {
