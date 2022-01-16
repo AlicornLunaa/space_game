@@ -15,7 +15,7 @@ namespace Phys {
         std::vector<sf::Vector2f> points;
         bool sleeping;
         bool enabled;
-        float springForce;
+        bool mStatic;
 
     public:
         Collider(float x, float y, float rotation);
@@ -25,8 +25,8 @@ namespace Phys {
         void setSleeping(bool s);
         bool isEnabled();
         void setEnabled(bool e);
-        float getSpringForce();
-        void setSpringForce(float s);
+        bool isStatic();
+        void setStatic(bool s);
         void addPoint(float x, float y);
         sf::Vector2f getPoint(unsigned int i);
         sf::Vector2f getPointGlobal(unsigned int i);

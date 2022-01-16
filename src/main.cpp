@@ -3,6 +3,7 @@
 #include "objects/parallax.h"
 #include "objects/player.h"
 #include "objects/vehicle.h"
+#include "interface/renderer.h"
 #include "phys/engine.h"
 #include "util/debugger.h"
 
@@ -10,6 +11,7 @@ int main(int argc, char** argv){
     sf::RenderWindow window(sf::VideoMode(1280, 720), "Space Game");
     window.setFramerateLimit(120);
     
+    Interface::Renderer::init(&window);
     Debug::init(&window);
     sf::Clock deltaClock;
     float deltaTime;
@@ -18,14 +20,13 @@ int main(int argc, char** argv){
     Phys::Engine engine;
     Phys::RigidBody rb(700, 300, 0); rb.addPoint(0, -1); rb.addPoint(-1, 1); rb.addPoint(1, 1); rb.scale(30, 40);
     engine.registerCollider(&rb);
-    int c2 = engine.registerCollider(new Phys::BoxRigidBody(320, 600, 100, 100));
-    int c3 = engine.registerCollider(new Phys::BoxRigidBody(460, 600, 100, 100));
-    engine.registerCollider(new Phys::BoxRigidBody(450, 250, 500, 100));
-    engine.getRigidBody(c2)->setSpringForce(0.f);
-    engine.getRigidBody(c3)->setSpringForce(0.f);
+    engine.registerCollider(new Phys::BoxRigidBody(320, 600, 100, 100));
+    engine.registerCollider(new Phys::BoxRigidBody(460, 600, 100, 100));
+    int c4 = engine.registerCollider(new Phys::BoxCollider(450, 250, 500, 100));
+    engine.getCollider(c4)->setStatic(true);
 
     Objects::Parallax parallaxEffect(window.getSize().x, window.getSize().y, 8.f);
-    Objects::Player player(engine, 700, 300);
+    Objects::Player player(engine, 600, 100);
     Vehicles::Ship ship(engine, 900, 300);
 
     sf::View hudCamera(sf::FloatRect(sf::Vector2f(0, 0), (sf::Vector2f)window.getSize()));

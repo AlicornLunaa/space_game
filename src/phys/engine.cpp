@@ -116,8 +116,12 @@ void Engine::collisionDetection(){
 void Engine::collisionResolution(){
     // Fix all the collisions
     for(CollisionData& c : collisions){
-        // Solve collisioN
-        c.c1->move(c.normal * c.displacement * -1.f);
+        // Solve collision
+        if(!c.c1->isStatic()){
+            c.c1->move(c.normal * c.displacement * -1.f);
+        } else if(!c.c2->isStatic()){
+            c.c2->move(c.normal * c.displacement * 1.f);
+        }
 
         // Check if the collider is also a rigidbody
         RigidBody* r1 = dynamic_cast<RigidBody*>(c.c1);

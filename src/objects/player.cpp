@@ -58,6 +58,8 @@ void Player::update(float deltaTime){
         rigidbody->setEnabled(false);
     }
 
+    rigidbody->acceleration.y += 9.8 * deltaTime;
+
     updateKeys(deltaTime);
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
