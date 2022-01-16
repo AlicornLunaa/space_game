@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 
+#include "objects/parallax.h"
 #include "phys/engine.h"
 #include "util/debugger.h"
 
@@ -21,6 +22,11 @@ int main(int argc, char** argv){
     engine.getRigidBody(c2)->setSpringForce(0.f);
     engine.getRigidBody(c3)->setSpringForce(0.f);
 
+    sf::View hudCamera(sf::FloatRect(sf::Vector2f(0, 0), (sf::Vector2f)window.getSize()));
+    sf::View playerCamera(rb.getPosition(), (sf::Vector2f)window.getSize());
+
+    Objects::Parallax parallaxEffect(window.getSize().x, window.getSize().y, 8.f);
+
     while(window.isOpen()){
         // Get delta time
         deltaTime = deltaClock.restart().asSeconds();
@@ -33,6 +39,10 @@ int main(int argc, char** argv){
             switch(e.type){
             case sf::Event::Closed:
                 window.close();
+                break;
+
+            case sf::Event::MouseWheelScrolled:
+                playerCamera.zoom(e.mouseWheelScroll.delta * -1.f + 1.5f);
                 break;
 
             default:
@@ -48,11 +58,18 @@ int main(int argc, char** argv){
 
         // Physics
         window.clear();
+
+        window.setView(hudCamera);
+        parallaxEffect.setCameraPosition(rb.getPosition());
+        window.draw(parallaxEffect);
+        Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
+
+        window.setView(playerCamera);
+        playerCamera.setCenter(rb.getPosition());
         engine.update(deltaTime);
 
         // Rendering
         window.draw(engine);
-        Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
         window.display();
     }
 
