@@ -104,6 +104,7 @@ void Engine::collisionDetection(){
     for(unsigned int i = 0; i < colliders.size(); i++){
         for(unsigned int j = i + 1; j < colliders.size(); j++){
             // Broadphase
+            if(!colliders[i]->isEnabled() || !colliders[j]->isEnabled()) continue;
             if(!collidesAABB(colliders[i], colliders[j])) continue;
 
             // Narrow phase

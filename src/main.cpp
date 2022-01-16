@@ -2,6 +2,7 @@
 
 #include "objects/parallax.h"
 #include "objects/player.h"
+#include "objects/vehicle.h"
 #include "phys/engine.h"
 #include "util/debugger.h"
 
@@ -23,11 +24,12 @@ int main(int argc, char** argv){
     engine.getRigidBody(c2)->setSpringForce(0.f);
     engine.getRigidBody(c3)->setSpringForce(0.f);
 
-    sf::View hudCamera(sf::FloatRect(sf::Vector2f(0, 0), (sf::Vector2f)window.getSize()));
-    sf::View playerCamera(rb.getPosition(), (sf::Vector2f)window.getSize());
-
     Objects::Parallax parallaxEffect(window.getSize().x, window.getSize().y, 8.f);
     Objects::Player player(engine, 700, 300);
+    Vehicles::Ship ship(engine, 900, 300);
+
+    sf::View hudCamera(sf::FloatRect(sf::Vector2f(0, 0), (sf::Vector2f)window.getSize()));
+    sf::View worldCamera(player.getPosition(), (sf::Vector2f)window.getSize());
 
     while(window.isOpen()){
         // Get delta time
@@ -44,7 +46,13 @@ int main(int argc, char** argv){
                 break;
 
             case sf::Event::MouseWheelScrolled:
-                playerCamera.zoom(e.mouseWheelScroll.delta * -1.f + 1.5f);
+                worldCamera.zoom(e.mouseWheelScroll.delta * -0.1f + 1.f);
+                break;
+
+            case sf::Event::KeyPressed:
+                if(e.key.code == sf::Keyboard::R){
+                    player.drive(player.isDriving() ? NULL : &ship);
+                }
                 break;
 
             default:
@@ -52,30 +60,25 @@ int main(int argc, char** argv){
             }
         }
 
-        // Controls
-        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rb.acceleration = rb.getUp() * 6.f * deltaTime; }
-        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rb.acceleration = rb.getUp() * -6.f * deltaTime; }
-        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rb.rotate(-100 * deltaTime); }
-        // if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rb.rotate(100 * deltaTime); }
-
         // Physics
-        window.clear();
         engine.update(deltaTime);
         player.update(deltaTime);
+        ship.update(deltaTime);
+        parallaxEffect.setCameraPosition(player.getPosition());
 
         // Hud drawing
+        window.clear();
         window.setView(hudCamera);
-        parallaxEffect.setCameraPosition(rb.getPosition());
         window.draw(parallaxEffect);
         Debug::drawText(10, 10, debugText, 18u, sf::Color::Yellow);
 
         // World drawing
-        window.setView(playerCamera);
-        playerCamera.setCenter(player.getPosition());
+        window.setView(worldCamera);
+        worldCamera.setCenter(player.getPosition());
         window.draw(player);
-
-        // Rendering
+        window.draw(ship);
         window.draw(engine);
+
         window.display();
     }
 

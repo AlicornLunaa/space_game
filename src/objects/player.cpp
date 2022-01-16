@@ -8,20 +8,22 @@ Player::Player(Phys::Engine& engine, float x, float y){
     setTexture(&tex);
 
     setPosition(x, y);
-    setSize(sf::Vector2f(20, 40));
+    setSize(sf::Vector2f(16, 32));
     setOrigin(getSize() * 0.5f);
 
-    rigidbody = new Phys::BoxRigidBody(x, y, 20, 40, 0.f);
+    rigidbody = new Phys::BoxRigidBody(x, y, 16, 32, 0.f);
     engine.registerCollider(rigidbody);
 
     driving = false;
     vehicle = NULL;
 }
 
-Player::~Player(){}
+Player::~Player(){
+    delete rigidbody;
+}
 
 // Private functions
-void Player::updateKeys(float deltaTime){    
+void Player::updateKeys(float deltaTime){
     // Controls
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->acceleration = rigidbody->getRight() * -5.f * deltaTime; }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->acceleration = rigidbody->getRight() * 5.f * deltaTime; }
@@ -30,23 +32,33 @@ void Player::updateKeys(float deltaTime){
 }
 
 // Vehicle functions
-void Player::drive(Vehicles::Vehicle* v){ vehicle = v; driving = !(v == NULL); }
+void Player::drive(Vehicles::Vehicle* v){
+    driving = !(v == NULL); 
+    vehicle = v;
+
+    if(!driving){
+        rigidbody->setRotation(0);
+    }
+}
+
 bool Player::isDriving(){ return driving; }
 Vehicles::Vehicle* Player::getVehicle(){ return vehicle; }
 
 // Physics functions
 void Player::update(float deltaTime){
     // Parent the vehicle to the player if driving
+    rigidbody->setEnabled(true);
+    
     if(isDriving()){
         Vehicles::Vehicle* v = getVehicle();
+        v->updateKeys(deltaTime);
 
-        v->update(deltaTime);
         rigidbody->setPosition(v->getPosition());
         rigidbody->setRotation(v->getRotation());
+        rigidbody->setEnabled(false);
     }
 
     updateKeys(deltaTime);
-
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }

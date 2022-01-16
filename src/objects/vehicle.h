@@ -6,13 +6,16 @@
 #pragma once
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include "../phys/engine.h"
 
 namespace Vehicles {
 
     class Vehicle : public sf::RectangleShape {
     protected:
-        sf::Texture texture;
+        sf::Texture tex;
         sf::Image body; // Image will contain the pixel data used to represent a fully modifiable ship
+        
+        Phys::BoxRigidBody* rigidbody;
 
     public:
         /**
@@ -21,13 +24,19 @@ namespace Vehicles {
          * @param height Height of the ship in pixels
          * @param scale The scale for the pixels
          */
-        Vehicle(unsigned int width, unsigned int height, unsigned int scale = 4u);
+        Vehicle(Phys::Engine& engine, float x, float y, unsigned int width, unsigned int height, unsigned int scale = 4u);
         ~Vehicle();
 
         /**
          * @brief Resets the ship's texture to the new pixel data
          */
         void updateTexture();
+
+        /**
+         * @brief Updates the physics by the keys
+         * @param deltaTime 
+         */
+        virtual void updateKeys(float deltaTime) = 0;
 
         /**
          * @brief Updates the ship's physical characteristics
@@ -48,13 +57,14 @@ namespace Vehicles {
          * @param height Height of the ship in pixels
          * @param scale The scale for the pixels
          */
-        Ship(unsigned int width, unsigned int height, unsigned int scale = 4u);
+        Ship(Phys::Engine& engine, float x, float y);
         ~Ship();
 
         /**
-         * @brief Resets the ship's texture to the new pixel data
+         * @brief Updates the controls
+         * @param deltaTime 
          */
-        void updateTexture();
+        void updateKeys(float deltaTime);
 
         /**
          * @brief Updates the ship's physical characteristics

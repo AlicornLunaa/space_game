@@ -20,9 +20,11 @@ namespace Phys {
     public:
         Collider(float x, float y, float rotation);
         ~Collider();
-
+        
         bool isSleeping();
         void setSleeping(bool s);
+        bool isEnabled();
+        void setEnabled(bool e);
         float getSpringForce();
         void setSpringForce(float s);
         void addPoint(float x, float y);
