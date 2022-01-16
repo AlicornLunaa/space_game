@@ -3,6 +3,7 @@
  * @author Luna
  * @brief This class holds functions to draw things to the screen without constructing SFML objects every time
  */
+#pragma once
 #include <assert.h>
 #include <SFML/Graphics.hpp>
 

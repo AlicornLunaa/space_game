@@ -1,7 +1,11 @@
 #include "parallax.h"
 using namespace Objects;
 
-Parallax::Parallax(unsigned int width, unsigned int height, float scale){
+Parallax::Parallax(unsigned int width, unsigned int height, float scale){ create(width, height, scale); }
+Parallax::Parallax(){}
+Parallax::~Parallax(){}
+
+void Parallax::create(unsigned int width, unsigned int height, float scale){
     // Load texture
     tex.loadFromFile("./res/textures/skybox.png");
     tex.setRepeated(true);
@@ -16,8 +20,6 @@ Parallax::Parallax(unsigned int width, unsigned int height, float scale){
     pos = sf::Vector2f(0, 0);
     this->scale = scale;
 }
-
-Parallax::~Parallax(){}
 
 void Parallax::setCameraPosition(sf::Vector2f p){
     // Save position

@@ -2,7 +2,11 @@
 using namespace Objects;
 
 // Constructors
-Player::Player(Phys::Engine& engine, float x, float y){
+Player::Player(Phys::Engine& engine, float x, float y){ create(engine, x, y); }
+Player::Player(){}
+Player::~Player(){}
+
+void Player::create(Phys::Engine& engine, float x, float y){
     // Initialize the player object
     tex.loadFromFile("./res/textures/player.png");
     setTexture(&tex);
@@ -16,10 +20,6 @@ Player::Player(Phys::Engine& engine, float x, float y){
 
     driving = false;
     vehicle = NULL;
-}
-
-Player::~Player(){
-    delete rigidbody;
 }
 
 // Private functions
@@ -57,8 +57,6 @@ void Player::update(float deltaTime){
         rigidbody->setRotation(v->getRotation());
         rigidbody->setEnabled(false);
     }
-
-    rigidbody->acceleration.y += 9.8 * deltaTime;
 
     updateKeys(deltaTime);
     setPosition(rigidbody->getPosition());

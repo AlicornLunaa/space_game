@@ -18,12 +18,6 @@ namespace Vehicles {
         Phys::BoxRigidBody* rigidbody;
 
     public:
-        /**
-         * @brief Construct a new Ship object
-         * @param width Width of the ship in pixels
-         * @param height Height of the ship in pixels
-         * @param scale The scale for the pixels
-         */
         Vehicle(Phys::Engine& engine, float x, float y, unsigned int width, unsigned int height, unsigned int scale = 4u);
         ~Vehicle();
 

@@ -16,7 +16,17 @@ namespace Objects {
         
     public:
         Parallax(unsigned int width, unsigned int height, float scale);
+        Parallax();
         ~Parallax();
+
+        /**
+         * @brief Creates the object
+         * 
+         * @param width 
+         * @param height 
+         * @param scale 
+         */
+        void create(unsigned int width, unsigned int height, float scale);
 
         /**
          * @brief Set the Camera Position object

@@ -26,7 +26,13 @@ namespace Objects {
 
     public:
         Player(Phys::Engine& engine, float x, float y);
+        Player();
         ~Player();
+
+        /**
+         * @brief Creates the object
+         */
+        void create(Phys::Engine& engine, float x, float y);
 
         // Vehicle functions
         /**

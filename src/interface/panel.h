@@ -3,6 +3,7 @@
  * @author Luna
  * @brief Contains the different objects to draw
  */
+#pragma once
 #include <SFML/Graphics.hpp>
 #include "renderer.h"
 
