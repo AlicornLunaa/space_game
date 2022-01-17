@@ -45,4 +45,12 @@ namespace Math {
      */
     sf::Vector2f reflect(sf::Vector2f v, sf::Vector2f n);
 
+    /**
+     * @brief Returns the distance of v1 to v2 squared
+     * @param v1 
+     * @param v2 
+     * @return float 
+     */
+    float distanceSquare(sf::Vector2f v1, sf::Vector2f v2);
+
 }

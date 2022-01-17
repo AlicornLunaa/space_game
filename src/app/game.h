@@ -25,6 +25,7 @@ private:
 
     // Game variables
     Objects::Parallax parallaxEffect;
+    Objects::Planet* planet;
     Objects::Player player;
     Vehicles::Ship* ship;
 

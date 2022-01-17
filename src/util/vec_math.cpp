@@ -34,3 +34,8 @@ sf::Vector2f Math::reflect(sf::Vector2f v, sf::Vector2f n){
 
     return out;
 }
+
+float Math::distanceSquare(sf::Vector2f v1, sf::Vector2f v2){
+    sf::Vector2f v = v2 - v1;
+    return v.x * v.x + v.y * v.y;
+}

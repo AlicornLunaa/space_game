@@ -17,6 +17,7 @@ void Game::start(){
 
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 10.f);
+    planet = new Objects::Planet(engine, 0, 0, "./res/textures/square.png");
     player.create(engine, 600, 100);
     ship = new Vehicles::Ship(engine, 900, 300);
 }
@@ -56,13 +57,16 @@ void Game::frame(){
     // World rendering
     worldCamera.setCenter(player.getPosition());
     window.setView(worldCamera);
+    window.draw(*planet);
     window.draw(player);
     window.draw(*ship);
     window.draw(engine);
+    planet->update(deltaTime);
 }
 
 void Game::end(){
     // Cleanup
+    delete planet;
     delete ship;
 }
 

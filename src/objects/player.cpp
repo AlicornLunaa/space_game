@@ -61,6 +61,8 @@ void Player::update(float deltaTime){
     updateKeys(deltaTime);
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
+
+    rigidbody->velocity *= 0.99f;
 }
 
 // Rendering functions
