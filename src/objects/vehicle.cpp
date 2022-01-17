@@ -19,6 +19,8 @@ Vehicle::~Vehicle(){
     delete rigidbody;
 }
 
+Phys::RigidBody* Vehicle::getRigidBody(){ return rigidbody; }
+
 void Vehicle::updateTexture(){
     // Reset the texture
     tex.loadFromImage(body);

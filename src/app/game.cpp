@@ -20,6 +20,8 @@ void Game::start(){
     planet = new Objects::Planet(engine, 0, 0, "./res/textures/planet.png");
     player.create(engine, 600, 100);
     ship = new Vehicles::Ship(engine, 900, 300);
+
+    ship->getRigidBody()->acceleration.y = -6;
 }
 
 void Game::event(){
@@ -56,6 +58,9 @@ void Game::frame(){
     worldCamera.setRotation(plyRot);
     player.getRigidBody()->setRotation(plyRot);
     player.getRigidBody()->acceleration += planetToPlayer * -9.8f * deltaTime;
+    
+    sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - (planet->getPosition() + planet->getSize() * 2.f));
+    ship->getRigidBody()->acceleration += planetToShip * -9.8f * deltaTime;
 
     // HUD rendering
     window.setView(hudCamera);

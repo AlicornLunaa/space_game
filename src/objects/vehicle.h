@@ -22,6 +22,12 @@ namespace Vehicles {
         ~Vehicle();
 
         /**
+         * @brief Get the Rigid Body object
+         * @return Phys::RigidBody* 
+         */
+        Phys::RigidBody* getRigidBody();
+
+        /**
          * @brief Resets the ship's texture to the new pixel data
          */
         void updateTexture();
