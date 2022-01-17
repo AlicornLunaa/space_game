@@ -54,6 +54,12 @@ namespace Objects {
          */
         Vehicles::Vehicle* getVehicle();
 
+        /**
+         * @brief Get the Rigid Body object
+         * @return Phys::RigidBody* 
+         */
+        Phys::RigidBody* getRigidBody();
+
         // Physics functions
         /**
          * @brief Updates the player

@@ -25,10 +25,10 @@ void Player::create(Phys::Engine& engine, float x, float y){
 // Private functions
 void Player::updateKeys(float deltaTime){
     // Controls
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->acceleration = rigidbody->getRight() * -5.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->acceleration = rigidbody->getRight() * 5.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->acceleration = rigidbody->getUp() * 5.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->acceleration = rigidbody->getUp() * -5.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->acceleration += rigidbody->getRight() * -8.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->acceleration += rigidbody->getRight() * 8.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->acceleration += rigidbody->getUp() * 14.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->acceleration += rigidbody->getUp() * -14.f * deltaTime; }
 }
 
 // Vehicle functions
@@ -43,6 +43,8 @@ void Player::drive(Vehicles::Vehicle* v){
 
 bool Player::isDriving(){ return driving; }
 Vehicles::Vehicle* Player::getVehicle(){ return vehicle; }
+
+Phys::RigidBody* Player::getRigidBody(){ return rigidbody; }
 
 // Physics functions
 void Player::update(float deltaTime){

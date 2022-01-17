@@ -71,7 +71,6 @@ void Planet::calculateMesh(){
     // Create collision mesh
     rigidbody->clearPoints();
     for(sf::Vector2f p1 : points){
-        Interface::Renderer::drawPoint(getPosition() + p1 * getScale().x, 1.f);
         rigidbody->addPoint(p1.x, p1.y);
     }
 }
@@ -173,6 +172,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, unsigned int radius)
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());
+    rigidbody->setStatic(true);
     calculateMesh();
     engine.registerCollider(rigidbody);
 }
@@ -188,6 +188,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, std::string path){
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());
+    rigidbody->setStatic(true);
     calculateMesh();
     engine.registerCollider(rigidbody);
 }

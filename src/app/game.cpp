@@ -50,6 +50,13 @@ void Game::frame(){
     ship->update(deltaTime);
     parallaxEffect.setCameraPosition(player.getPosition());
 
+    // Player gravity
+    sf::Vector2f planetToPlayer = Math::normalize(player.getPosition() - (planet->getPosition() + planet->getSize() * 2.f));
+    float plyRot = std::atan2(planetToPlayer.y, planetToPlayer.x) * (180 / 3.1415) + 90;
+    worldCamera.setRotation(plyRot);
+    player.getRigidBody()->setRotation(plyRot);
+    player.getRigidBody()->acceleration += planetToPlayer * -9.8f * deltaTime;
+
     // HUD rendering
     window.setView(hudCamera);
     window.draw(parallaxEffect);
