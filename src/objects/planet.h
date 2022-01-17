@@ -36,6 +36,12 @@ namespace Objects {
         std::vector<sf::Vector2f> triangulate(std::vector<double>& points);
 
         /**
+         * @brief Convert to convex hull
+         * @param points 
+         */
+        void convertMesh(std::vector<sf::Vector2f>& points);
+
+        /**
          * @brief Cleans the mesh
          * @param points 
          */

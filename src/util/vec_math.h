@@ -54,4 +54,12 @@ namespace Math {
      */
     float distanceSquare(sf::Vector2f v1, sf::Vector2f v2);
 
+    /**
+     * @brief Calculates the cross product
+     * @param v1 
+     * @param v2 
+     * @return sf::Vector3f 
+     */
+    sf::Vector3f cross(sf::Vector2f v1, sf::Vector2f v2);
+
 }

@@ -28,6 +28,7 @@ namespace Phys {
         bool isStatic();
         void setStatic(bool s);
         void addPoint(float x, float y);
+        void clearPoints();
         sf::Vector2f getPoint(unsigned int i);
         sf::Vector2f getPointGlobal(unsigned int i);
         unsigned int getPointCount();

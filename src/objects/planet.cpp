@@ -66,33 +66,14 @@ void Planet::calculateMesh(){
     }
 
     cleanupMesh(points);
+    convertMesh(points);
 
     // Create collision mesh
-    std::vector<double> rawPoints;
+    rigidbody->clearPoints();
     for(sf::Vector2f p1 : points){
-        rawPoints.push_back(p1.x);
-        rawPoints.push_back(p1.y);
+        Interface::Renderer::drawPoint(getPosition() + p1 * getScale().x, 1.f);
+        rigidbody->addPoint(p1.x, p1.y);
     }
-
-    std::vector<sf::Vector2f> mesh = triangulate(rawPoints);
-    // std::vector<Phys::Collider*> colliders;
-
-    // // Create colliders from mesh
-    // for(unsigned int i = 0; i < mesh.size(); i += 3){
-    //     // Triangle points
-    //     sf::Vector2f p1 = mesh[i];
-    //     sf::Vector2f p2 = mesh[i + 1];
-    //     sf::Vector2f p3 = mesh[i + 2];
-
-    //     // Create collider
-    //     Phys::Collider* c = new Phys::Collider(getPosition().x, getPosition().y, 0.f);
-    //     c->setScale(getScale());
-    //     c->addPoint(p1.x, p1.y);
-    //     c->addPoint(p2.x, p2.y);
-    //     c->addPoint(p3.x, p3.y);
-    //     colliders.push_back(c);
-    //     engine->registerCollider(c);
-    // }
 }
 
 std::vector<sf::Vector2f> Planet::triangulate(std::vector<double>& points){
@@ -113,6 +94,62 @@ std::vector<sf::Vector2f> Planet::triangulate(std::vector<double>& points){
     }
 
     return out;
+}
+
+void Planet::convertMesh(std::vector<sf::Vector2f>& points){
+    // Run a jarvis march to get the hull
+    sf::Vector2f leftMost = points[0];
+    sf::Vector2f currentVertex = leftMost;
+    unsigned int startIndex = 2;
+    unsigned int index = 2;
+    int nextIndex = -1;
+    sf::Vector2f nextVertex = points[1];
+    std::vector<sf::Vector2f> hull = { currentVertex };
+    
+    // Find the leftmost point
+    for(unsigned int i = 1; i < points.size(); i++){
+        if(points[i].x < leftMost.x){
+            // Closer
+            leftMost = points[i];
+            currentVertex = leftMost;
+            startIndex = (i + 2) % points.size();
+            index = startIndex;
+            nextVertex = points[(i + 1) % points.size()];
+        }
+    }
+
+    // Start the march
+    while(true){
+        sf::Vector2f checking = points[index];
+        float crossProduct = Math::cross(nextVertex - currentVertex, checking - currentVertex).z;
+
+        if(crossProduct < 0){
+            nextVertex = checking;
+            nextIndex = index;
+        }
+        
+        index = (index + 1) % points.size();
+
+        if(index == startIndex){
+            if(nextVertex == leftMost){
+                break;
+            }
+
+            hull.push_back(nextVertex);
+            currentVertex = nextVertex;
+            index = startIndex;
+            points.erase(points.begin() + nextIndex);
+            nextVertex = leftMost;
+        }
+    }
+
+    // Draw hull
+    for(unsigned int i = 0; i < hull.size(); i++){
+        sf::Vector2f p1 = hull[i];
+        sf::Vector2f p2 = hull[(i + 1) % hull.size()];
+        Interface::Renderer::drawLine(getPosition() + p1 * getScale().x, getPosition() + p2 * getScale().x, sf::Color::Yellow);
+    }
+    points = hull;
 }
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){

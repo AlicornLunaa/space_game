@@ -20,6 +20,7 @@ void Collider::setEnabled(bool e){ enabled = e; }
 bool Collider::isStatic(){ return mStatic; }
 void Collider::setStatic(bool s){ mStatic = s; }
 void Collider::addPoint(float x, float y){ points.push_back(sf::Vector2f(x, y)); }
+void Collider::clearPoints(){ points.clear(); }
 sf::Vector2f Collider::getPoint(unsigned int i){ return points[i]; }
 unsigned int Collider::getPointCount(){ return points.size(); }
 
