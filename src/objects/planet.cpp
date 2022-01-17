@@ -16,9 +16,7 @@ void Planet::calculateMesh(){
     */
     // Get data
     sf::Vector2u size = planetData.getSize();
-    sf::Vector2f parentTopLeft = getPosition();
     std::vector<sf::Vector2f> points;
-    std::vector<double> pointsRaw;
 
     // Start marching squares from top-left down iteration path
     for(unsigned int x = 0; x < size.x; x++){
@@ -141,87 +139,102 @@ void Planet::calculateMesh(){
         }
     }
 
-
     cleanupMesh(points);
-    // Outline drawing for testing
-    for(unsigned i = 0; i < points.size(); i++){
+
+    // Create collision mesh
+    std::vector<double> rawPoints;
+    for(sf::Vector2f p1 : points){
+        rawPoints.push_back(p1.x);
+        rawPoints.push_back(p1.y);
+    }
+
+    for(unsigned int i = 0; i < points.size(); i++){
         sf::Vector2f p1 = points[i];
         sf::Vector2f p2 = points[(i + 1) % points.size()];
-        Interface::Renderer::drawLine(parentTopLeft + p1 * getScale().x, parentTopLeft + p2 * getScale().y, sf::Color::Red);
+        Interface::Renderer::drawLine(getPosition() + p1 * getScale().x, getPosition() + p2 * getScale().x, sf::Color::Red);
     }
 }
 
 std::vector<sf::Vector2f> Planet::triangulate(std::vector<double>& points){
     // Convert to triangles to use with the collision detection
     std::vector<sf::Vector2f> out;
-    delaunator::Delaunator d(points);
+    // delaunator::Delaunator d(points);
 
-    for(unsigned int i = 0; i < d.triangles.size(); i++){
-        // Convert data
-        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i]], d.coords[2 * d.triangles[i] + 1]));
-        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 1]], d.coords[2 * d.triangles[i + 1] + 1]));
-        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 2]], d.coords[2 * d.triangles[i + 2] + 1]));
+    // for(unsigned int i = 0; i < d.triangles.size(); i += 3){
+    //     // Convert data
+    //     out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i]], d.coords[2 * d.triangles[i] + 1]));
+    //     out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 1]], d.coords[2 * d.triangles[i + 1] + 1]));
+    //     out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 2]], d.coords[2 * d.triangles[i + 2] + 1]));
 
-        // Draw lines
-        Interface::Renderer::drawLine(out[i * 3], out[i * 3 + 1]);
-        Interface::Renderer::drawLine(out[i * 3 + 1], out[i * 3 + 2]);
-        Interface::Renderer::drawLine(out[i * 3 + 2], out[i * 3]);
-    }
+    //     // Draw lines
+    //     // Interface::Renderer::drawLine(out[i] * getScale().x, out[i + 1] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+    //     // Interface::Renderer::drawLine(out[i + 1] * getScale().x, out[i + 2] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+    //     // Interface::Renderer::drawLine(out[i + 2] * getScale().x, out[i] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+    // }
 
     return out;
 }
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     // Remove duplicate points
-    int current = points.size() - 1;
-    while(current >= 0){
-        for(unsigned int i = 0; i < points.size(); i++){
-            if(points[i] == points[current]){
-                points.erase(points.begin() + i);
+    // int current = points.size() - 1;
+    // while(current >= 0){
+    //     for(unsigned int i = 0; i < points.size(); i++){
+    //         if(points[i] == points[current]){
+    //             points.erase(points.begin() + i);
 
-                i--;
-                current--;
-            }
-        }
+    //             i--;
+    //             current--;
+    //         }
+    //     }
 
-        current--;
-    }
+    //     current--;
+    // }
 
     // Convert into one line
-    std::vector<sf::Vector2f> hull = { points[0] };
-    unsigned int index = 0;
+    // std::vector<sf::Vector2f> hull;
+    // unsigned int index = 0;
 
-    // Loop through every line segment
-    while(points.size() != 0){
-        sf::Vector2f p1 = points[index];
-        float minDistance = INFINITY;
+    // // Loop through every line segment
+    // while(points.size() > 1){
+    //     sf::Vector2f start1 = points[index];
+    //     sf::Vector2f end1 = points[(index + 1) % points.size()];
 
-        // Find the other line segment that starts the closest to the first lines end
-        for(unsigned int j = 0; j < points.size(); j += 2){
-            sf::Vector2f p2 = points[j];
+    //     // Find the other line segment that starts the closest to the first lines end
+    //     for(unsigned int j = 0; j < points.size(); j += 2){
+    //         // Skip self
+    //         if(j == index || j == index + 1) continue;
 
-            // Find next link
-            float currentDistance = Math::distanceSquare(p1, p2);
-            if(currentDistance < minDistance && currentDistance != 0 && index != j && index + 1 != j){
-                index = j;
-                minDistance = currentDistance;
-            }
-            bool a = false;
-        }
+    //         // Get positions
+    //         sf::Vector2f start2 = points[j];
+    //         sf::Vector2f end2 = points[(j + 1) % points.size()];
 
-        // Add point
-        hull.push_back(points[index]);
-        points.erase(points.begin());
-        
+    //         // Find next link
+    //         if(start1 == start2){
+    //             // The beginning of the line segment is the start of the next segment
+    //             index = (j + 1) % points.size();
 
-        // Exit condition
-        if(index == 0)
-            break;
+    //             // Add point
+    //             hull.push_back(points[index]);
+    //             points.erase(points.end());
+    //             points.erase(points.end());
+    //             break;
+    //         } else if(end1 == start2){
+    //             // The end of the line segment is the start of the next segment
+    //             index = j;
 
-        index--;
-    }
+    //             // Add point
+    //             hull.push_back(points[index]);
+    //             points.erase(points.end());
+    //             points.erase(points.end());
+    //             break;
+    //         }
 
-    points = hull;
+    //         bool a = false;
+    //     }
+    // }
+
+    // points = hull;
 }
 
 Planet::Planet(Phys::Engine& engine, float x, float y, unsigned int radius){ create(engine, x, y, radius); }

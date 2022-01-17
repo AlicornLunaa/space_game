@@ -3,6 +3,7 @@
  * @author Luna
  * @brief Mathematical functions for sfml vectors
  */
+#pragma once
 #include <cmath>
 #include <SFML/System.hpp>
 

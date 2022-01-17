@@ -3,12 +3,13 @@
  * @author Luna
  * @brief Controls different planet objects
  */
+#pragma once
 #include <string>
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "../interface/renderer.h"
 #include "../phys/physics.h"
-#include "../util/delaunator.hpp"
+// #include "../util/delaunator.hpp"
 
 namespace Objects {
 
