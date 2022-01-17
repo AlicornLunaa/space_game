@@ -74,9 +74,9 @@ void Renderer::drawPoint(float x, float y, float radius, sf::Color color){
     assert(window != nullptr);
 
     // Get circle propertires
-    circ.setPosition(x, y);
     circ.setRadius(radius);
-    circ.setOrigin(radius / 2, radius / 2);
+    circ.setOrigin(radius, radius);
+    circ.setPosition(x, y);
     circ.setFillColor(color);
 
     window->draw(circ);
