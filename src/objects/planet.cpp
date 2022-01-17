@@ -1,4 +1,5 @@
 #include "planet.h"
+#include "../util/delaunator.hpp"
 using namespace Objects;
 
 void Planet::reloadTexture(){
@@ -32,109 +33,34 @@ void Planet::calculateMesh(){
             bool right = edge || (planetData.getPixel(x + 1, y).a <= threshold);
             bool top = edge || (planetData.getPixel(x, y - 1).a <= threshold);
             bool bottom = edge || (planetData.getPixel(x, y + 1).a <= threshold);
-            bool topLeft = edge || (planetData.getPixel(x - 1, y - 1).a <= threshold);
-            bool topRight = edge || (planetData.getPixel(x + 1, y - 1).a <= threshold);
-            bool bottomLeft = edge || (planetData.getPixel(x - 1, y + 1).a <= threshold);
-            bool bottomRight = edge || (planetData.getPixel(x + 1, y + 1).a <= threshold);
 
             if(top){
                 // 0 and 1 get activated
                 state |= (1UL << 0);
                 state |= (1UL << 1);
-            } else {
-                if(topLeft){ state |= (1UL << 0); }
-                if(topRight){ state |= (1UL << 1); }
             }
 
             if(right){
                 // 1 and 2 get activated
                 state |= (1UL << 1);
                 state |= (1UL << 2);
-            } else {
-                if(topRight){ state |= (1UL << 1); }
-                if(bottomRight){ state |= (1UL << 2); }
             }
 
             if(bottom){
                 // 2 and 3 get activated
                 state |= (1UL << 2);
                 state |= (1UL << 3);
-            } else {
-                if(bottomRight){ state |= (1UL << 2); }
-                if(bottomLeft){ state |= (1UL << 3); }
             }
 
             if(left){
                 // 3 and 0 get activated
                 state |= (1UL << 3);
                 state |= (1UL << 0);
-            } else {
-                if(bottomLeft){ state |= (1UL << 3); }
-                if(topLeft){ state |= (1UL << 0); }
             }
 
             // Outline the shape if its not surrounded on every side and has at least one neighbor
-            switch(state){
-            case 0: // None
-                break;
-            case 1: // Top left
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, y));
-                points.push_back(sf::Vector2f(x, (y + y - 1) / 2.f));
-                break;
-            case 2: // Top right
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, y));
-                points.push_back(sf::Vector2f(x, (y + y - 1) / 2.f));
-                break;
-            case 3: // Top
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, y));
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, y));
-                break;
-            case 4: // Bottom right
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, y));
-                points.push_back(sf::Vector2f(x, (y + y + 1) / 2.f));
-                break;
-            case 5: // Double backslash
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, (y + y - 1) / 2.f));
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, (y + y + 1) / 2.f));
-                break;
-            case 6: // Right
-                points.push_back(sf::Vector2f(x, (y + y - 1) / 2.f));
-                points.push_back(sf::Vector2f(x, (y + y + 1) / 2.f));
-                break;
-            case 7: // Bottom backslash
-                points.push_back(sf::Vector2f(x, (y + y + 1) / 2.f));
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, y));
-                break;
-            case 8: // Bottom left
-                points.push_back(sf::Vector2f(x, (y + y + 1) / 2.f));
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, y));
-                break;
-            case 9: // Left
-                points.push_back(sf::Vector2f(x, (y + y - 1) / 2.f));
-                points.push_back(sf::Vector2f(x, (y + y + 1) / 2.f));
-                break;
-            case 10: // Double forwardslash
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, (y + y + 1) / 2.f));
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, (y + y - 1) / 2.f));
-                break;
-            case 11: // Bottom forwardslash
-                points.push_back(sf::Vector2f(x, (y + y + 1) / 2.f));
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, y));
-                break;
-            case 12: // Bottom
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, y));
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, y));
-                break;
-            case 13: // Top backslash
-                points.push_back(sf::Vector2f((x + x + 1) / 2.f, y));
-                points.push_back(sf::Vector2f(x, (y + y - 1) / 2.f));
-                break;
-            case 14: // Top forwardslash
-                points.push_back(sf::Vector2f((x + x - 1) / 2.f, y));
-                points.push_back(sf::Vector2f(x, (y + y - 1) / 2.f));
-                break;
-            case 15: // Filled
-                break;
+            if(state != 0 && state != 15){
+                points.push_back(sf::Vector2f(x + 0.5f, y + 0.5f));
             }
         }
     }
@@ -148,93 +74,50 @@ void Planet::calculateMesh(){
         rawPoints.push_back(p1.y);
     }
 
-    for(unsigned int i = 0; i < points.size(); i++){
-        sf::Vector2f p1 = points[i];
-        sf::Vector2f p2 = points[(i + 1) % points.size()];
-        Interface::Renderer::drawLine(getPosition() + p1 * getScale().x, getPosition() + p2 * getScale().x, sf::Color::Red);
-    }
+    std::vector<sf::Vector2f> mesh = triangulate(rawPoints);
+    // std::vector<Phys::Collider*> colliders;
+
+    // // Create colliders from mesh
+    // for(unsigned int i = 0; i < mesh.size(); i += 3){
+    //     // Triangle points
+    //     sf::Vector2f p1 = mesh[i];
+    //     sf::Vector2f p2 = mesh[i + 1];
+    //     sf::Vector2f p3 = mesh[i + 2];
+
+    //     // Create collider
+    //     Phys::Collider* c = new Phys::Collider(getPosition().x, getPosition().y, 0.f);
+    //     c->setScale(getScale());
+    //     c->addPoint(p1.x, p1.y);
+    //     c->addPoint(p2.x, p2.y);
+    //     c->addPoint(p3.x, p3.y);
+    //     colliders.push_back(c);
+    //     engine->registerCollider(c);
+    // }
 }
 
 std::vector<sf::Vector2f> Planet::triangulate(std::vector<double>& points){
     // Convert to triangles to use with the collision detection
     std::vector<sf::Vector2f> out;
-    // delaunator::Delaunator d(points);
+    delaunator::Delaunator d(points);
 
-    // for(unsigned int i = 0; i < d.triangles.size(); i += 3){
-    //     // Convert data
-    //     out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i]], d.coords[2 * d.triangles[i] + 1]));
-    //     out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 1]], d.coords[2 * d.triangles[i + 1] + 1]));
-    //     out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 2]], d.coords[2 * d.triangles[i + 2] + 1]));
+    for(unsigned int i = 0; i < d.triangles.size(); i += 3){
+        // Convert data
+        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i]], d.coords[2 * d.triangles[i] + 1]));
+        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 1]], d.coords[2 * d.triangles[i + 1] + 1]));
+        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 2]], d.coords[2 * d.triangles[i + 2] + 1]));
 
-    //     // Draw lines
-    //     // Interface::Renderer::drawLine(out[i] * getScale().x, out[i + 1] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
-    //     // Interface::Renderer::drawLine(out[i + 1] * getScale().x, out[i + 2] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
-    //     // Interface::Renderer::drawLine(out[i + 2] * getScale().x, out[i] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
-    // }
+        // Draw lines
+        Interface::Renderer::drawLine(out[i] * getScale().x, out[i + 1] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+        Interface::Renderer::drawLine(out[i + 1] * getScale().x, out[i + 2] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+        Interface::Renderer::drawLine(out[i + 2] * getScale().x, out[i] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+    }
 
     return out;
 }
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     // Remove duplicate points
-    // int current = points.size() - 1;
-    // while(current >= 0){
-    //     for(unsigned int i = 0; i < points.size(); i++){
-    //         if(points[i] == points[current]){
-    //             points.erase(points.begin() + i);
-
-    //             i--;
-    //             current--;
-    //         }
-    //     }
-
-    //     current--;
-    // }
-
-    // Convert into one line
-    // std::vector<sf::Vector2f> hull;
-    // unsigned int index = 0;
-
-    // // Loop through every line segment
-    // while(points.size() > 1){
-    //     sf::Vector2f start1 = points[index];
-    //     sf::Vector2f end1 = points[(index + 1) % points.size()];
-
-    //     // Find the other line segment that starts the closest to the first lines end
-    //     for(unsigned int j = 0; j < points.size(); j += 2){
-    //         // Skip self
-    //         if(j == index || j == index + 1) continue;
-
-    //         // Get positions
-    //         sf::Vector2f start2 = points[j];
-    //         sf::Vector2f end2 = points[(j + 1) % points.size()];
-
-    //         // Find next link
-    //         if(start1 == start2){
-    //             // The beginning of the line segment is the start of the next segment
-    //             index = (j + 1) % points.size();
-
-    //             // Add point
-    //             hull.push_back(points[index]);
-    //             points.erase(points.end());
-    //             points.erase(points.end());
-    //             break;
-    //         } else if(end1 == start2){
-    //             // The end of the line segment is the start of the next segment
-    //             index = j;
-
-    //             // Add point
-    //             hull.push_back(points[index]);
-    //             points.erase(points.end());
-    //             points.erase(points.end());
-    //             break;
-    //         }
-
-    //         bool a = false;
-    //     }
-    // }
-
-    // points = hull;
+    
 }
 
 Planet::Planet(Phys::Engine& engine, float x, float y, unsigned int radius){ create(engine, x, y, radius); }
@@ -274,7 +157,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, std::string path){
 
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    calculateMesh();
+    //calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }

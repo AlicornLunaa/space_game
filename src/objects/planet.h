@@ -9,7 +9,6 @@
 #include <SFML/Graphics.hpp>
 #include "../interface/renderer.h"
 #include "../phys/physics.h"
-// #include "../util/delaunator.hpp"
 
 namespace Objects {
 
