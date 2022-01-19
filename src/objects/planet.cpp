@@ -8,13 +8,6 @@ void Planet::reloadTexture(){
 }
 
 void Planet::calculateMesh(){
-    /* 1         2
-        *-------*
-        |       |
-        |       |
-        *-------*
-       8         4
-    */
     // Get data
     sf::Vector2u size = planetData.getSize();
     std::vector<sf::Vector2f> points;
@@ -65,7 +58,7 @@ void Planet::calculateMesh(){
         }
     }
 
-    cleanupMesh(points);
+    //cleanupMesh(points);
     convertMesh(points);
 
     // Create collision mesh
@@ -152,8 +145,46 @@ void Planet::convertMesh(std::vector<sf::Vector2f>& points){
 }
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
-    // Remove duplicate points
-    
+    // Run nearest neighbor algorithm
+    sf::Vector2 start = points[0];
+    sf::Vector2f current = start;
+    unsigned int index = 1;
+    int nextIndex = -1;
+    float lastDist = INFINITY;
+    sf::Vector2f next = points[1];
+    std::vector<sf::Vector2f> hull = { start };
+
+    while(points.size() > 0){
+        // Find closest
+        sf::Vector2f checking = points[index];
+        float dist = Math::distanceSquare(current, checking);
+
+        // Point is closer, save it
+        if(dist < lastDist){
+            next = checking;
+            nextIndex = index;
+            lastDist = dist;
+        }
+        
+        index = (index + 1) % points.size();
+
+        if(index == 0){
+            // Exit condition
+            if(next == start){
+                break;
+            }
+
+            // Add the closest to the hull
+            hull.push_back(next);
+            current = next;
+            index = 1;
+            points.erase(points.begin() + nextIndex);
+            next = start;
+            lastDist = INFINITY;
+        }
+    }
+
+    points = hull;
 }
 
 Planet::Planet(Phys::Engine& engine, float x, float y, unsigned int radius){ create(engine, x, y, radius); }
@@ -195,7 +226,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, std::string path){
 
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    //calculateMesh();
+    calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }
