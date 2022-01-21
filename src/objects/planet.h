@@ -48,8 +48,8 @@ namespace Objects {
         void cleanupMesh(std::vector<sf::Vector2f>& points);
 
     public:
-        Planet(Phys::Engine& engine, float x, float y, unsigned int radius);
-        Planet(Phys::Engine& engine, float x, float y, std::string path);
+        Planet(Phys::Engine& engine, float x, float y, float scale, unsigned int radius);
+        Planet(Phys::Engine& engine, float x, float y, float scale, std::string path);
         Planet();
         ~Planet();
 
@@ -60,7 +60,7 @@ namespace Objects {
          * @param y 
          * @param radius 
          */
-        void create(Phys::Engine& engine, float x, float y, unsigned int radius);
+        void create(Phys::Engine& engine, float x, float y, float scale, unsigned int radius);
 
         /**
          * @brief Creates a new planet object based on the image
@@ -69,7 +69,13 @@ namespace Objects {
          * @param y 
          * @param path 
          */
-        void create(Phys::Engine& engine, float x, float y, std::string path);
+        void create(Phys::Engine& engine, float x, float y, float scale, std::string path);
+
+        /**
+         * @brief Get the center of the planet
+         * @return sf::Vector2f 
+         */
+        sf::Vector2f getCenter();
 
         /**
          * @brief Updates the planet

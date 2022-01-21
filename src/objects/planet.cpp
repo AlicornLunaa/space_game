@@ -11,6 +11,7 @@ void Planet::calculateMesh(){
     // Get data
     sf::Vector2u size = planetData.getSize();
     std::vector<sf::Vector2f> points;
+    std::vector<double> pointsRaw;
 
     // Start marching squares from top-left down iteration path
     for(unsigned int x = 0; x < size.x; x++){
@@ -58,7 +59,7 @@ void Planet::calculateMesh(){
         }
     }
 
-    //cleanupMesh(points);
+    cleanupMesh(points);
     convertMesh(points);
 
     // Create collision mesh
@@ -187,18 +188,18 @@ void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     points = hull;
 }
 
-Planet::Planet(Phys::Engine& engine, float x, float y, unsigned int radius){ create(engine, x, y, radius); }
-Planet::Planet(Phys::Engine& engine, float x, float y, std::string path){ create(engine, x, y, path); }
+Planet::Planet(Phys::Engine& engine, float x, float y, float scale, unsigned int radius){ create(engine, x, y, scale, radius); }
+Planet::Planet(Phys::Engine& engine, float x, float y, float scale, std::string path){ create(engine, x, y, scale, path); }
 Planet::Planet(){}
 Planet::~Planet(){}
 
-void Planet::create(Phys::Engine& engine, float x, float y, unsigned int radius){
+void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigned int radius){
     // Create a default planet with the given radius
     planetData.create(radius * 2, radius * 2, sf::Color(0, 100, 0));
     reloadTexture();
 
     setPosition(x, y);
-    setScale(4.f, 4.f);
+    setScale(scale, scale);
     setSize(sf::Vector2f(radius, radius) * 2.f);
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
@@ -208,13 +209,13 @@ void Planet::create(Phys::Engine& engine, float x, float y, unsigned int radius)
     engine.registerCollider(rigidbody);
 }
 
-void Planet::create(Phys::Engine& engine, float x, float y, std::string path){
+void Planet::create(Phys::Engine& engine, float x, float y, float scale, std::string path){
     // Create a planet from the given texture
     planetData.loadFromFile(path);
     reloadTexture();
 
     setPosition(x, y);
-    setScale(4.f, 4.f);
+    setScale(scale, scale);
     setSize((sf::Vector2f)planetData.getSize());
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
@@ -224,9 +225,13 @@ void Planet::create(Phys::Engine& engine, float x, float y, std::string path){
     engine.registerCollider(rigidbody);
 }
 
+sf::Vector2f Planet::getCenter(){
+    return getPosition() + getSize() * (getScale().x / 2);
+}
+
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    calculateMesh();
+    //calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }

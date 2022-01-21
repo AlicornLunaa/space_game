@@ -16,8 +16,8 @@ void Game::start(){
     Debug::init(&window);
 
     // Initialize game variables
-    parallaxEffect.create(window.getSize().x, window.getSize().y, 10.f);
-    planet = new Objects::Planet(engine, 0, 0, "./res/textures/planet.png");
+    parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
+    planet = new Objects::Planet(engine, 0, 0, 160.f, "./res/textures/planet.png");
     player.create(engine, 600, 100);
     ship = new Vehicles::Ship(engine, 900, 300);
 
@@ -53,13 +53,13 @@ void Game::frame(){
     parallaxEffect.setCameraPosition(player.getPosition());
 
     // Player gravity
-    sf::Vector2f planetToPlayer = Math::normalize(player.getPosition() - (planet->getPosition() + planet->getSize() * 2.f));
+    sf::Vector2f planetToPlayer = Math::normalize(player.getPosition() - planet->getCenter());
     float plyRot = std::atan2(planetToPlayer.y, planetToPlayer.x) * (180 / 3.1415) + 90;
     worldCamera.setRotation(plyRot);
     player.getRigidBody()->setRotation(plyRot);
     player.getRigidBody()->acceleration += planetToPlayer * -9.8f * deltaTime;
     
-    sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - (planet->getPosition() + planet->getSize() * 2.f));
+    sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - planet->getCenter());
     ship->getRigidBody()->acceleration += planetToShip * -9.8f * deltaTime;
 
     // HUD rendering
