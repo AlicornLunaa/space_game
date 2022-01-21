@@ -57,7 +57,7 @@ bool Engine::collidesSAT(Collider* c1, Collider* c2){
 
             // Get overlap data to respond
             float currentOverlap = max1 - min2;
-            if(currentOverlap < data.displacement){
+            if(currentOverlap < data.displacement && currentOverlap != 0){
                 data.normal = normal * scalar;
                 data.displacement = currentOverlap;
                 data.contactPoint = i;
@@ -119,7 +119,8 @@ void Engine::collisionResolution(){
         // Solve collision
         if(!c.c1->isStatic()){
             c.c1->move(c.normal * c.displacement * -1.f);
-        } else if(!c.c2->isStatic()){
+        }
+        if(!c.c2->isStatic()){
             c.c2->move(c.normal * c.displacement * 1.f);
         }
 

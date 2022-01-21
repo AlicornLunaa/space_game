@@ -1,5 +1,5 @@
 #include "planet.h"
-#include "../util/delaunator.hpp"
+#include "../util/earcut.hpp"
 using namespace Objects;
 
 void Planet::reloadTexture(){
@@ -53,14 +53,15 @@ void Planet::calculateMesh(){
             }
 
             // Outline the shape if its not surrounded on every side and has at least one neighbor
-            if(state != 0 && state != 15){
+            if(state != 0 && state != 15 && (top ^ right ^ bottom ^ left)){
                 points.push_back(sf::Vector2f(x + 0.5f, y + 0.5f));
             }
         }
     }
 
     cleanupMesh(points);
-    convertMesh(points);
+    //convertMesh(points);
+    convertToCollider(points);
 
     // Create collision mesh
     rigidbody->clearPoints();
@@ -69,24 +70,24 @@ void Planet::calculateMesh(){
     }
 }
 
-std::vector<sf::Vector2f> Planet::triangulate(std::vector<double>& points){
+void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
     // Convert to triangles to use with the collision detection
-    std::vector<sf::Vector2f> out;
-    delaunator::Delaunator d(points);
+    std::vector<std::vector<std::array<float, 2>>> polygon;
+    polygon.push_back({}); // First array
 
-    for(unsigned int i = 0; i < d.triangles.size(); i += 3){
-        // Convert data
-        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i]], d.coords[2 * d.triangles[i] + 1]));
-        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 1]], d.coords[2 * d.triangles[i + 1] + 1]));
-        out.push_back(sf::Vector2f(d.coords[2 * d.triangles[i + 2]], d.coords[2 * d.triangles[i + 2] + 1]));
-
-        // Draw lines
-        Interface::Renderer::drawLine(out[i] * getScale().x, out[i + 1] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
-        Interface::Renderer::drawLine(out[i + 1] * getScale().x, out[i + 2] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
-        Interface::Renderer::drawLine(out[i + 2] * getScale().x, out[i] * getScale().x, (i / 3 % 2 == 0) ? sf::Color::Red : sf::Color::White);
+    for(sf::Vector2f p : points){
+        polygon.back().push_back({ p.x, p.y });
     }
 
-    return out;
+    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
+    for(unsigned int i = 0; i < indices.size(); i += 3){
+        sf::Vector2f p1 = points[indices[i]];
+        sf::Vector2f p2 = points[indices[i + 1]];
+        sf::Vector2f p3 = points[indices[i + 2]];
+        Interface::Renderer::drawLine(p1, p2);
+        Interface::Renderer::drawLine(p2, p3);
+        Interface::Renderer::drawLine(p3, p1);
+    }
 }
 
 void Planet::convertMesh(std::vector<sf::Vector2f>& points){
@@ -142,6 +143,7 @@ void Planet::convertMesh(std::vector<sf::Vector2f>& points){
         sf::Vector2f p2 = hull[(i + 1) % hull.size()];
         Interface::Renderer::drawLine(getPosition() + p1 * getScale().x, getPosition() + p2 * getScale().x, sf::Color::Yellow);
     }
+
     points = hull;
 }
 
@@ -183,6 +185,25 @@ void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
             next = start;
             lastDist = INFINITY;
         }
+    }
+
+    // Remove colinear points
+    for(unsigned int i = 0; i < hull.size(); i++){
+        // Get slopes
+        sf::Vector2f start = hull[i];
+        sf::Vector2f mid = hull[(i + 1) % hull.size()];
+        sf::Vector2f end = hull[(i + 2) % hull.size()];
+
+        if((start.x - mid.x) * (start.y - mid.y) == (mid.x - end.x) * (mid.y - end.y)){
+            hull.erase(hull.begin() + ((i + 1) % hull.size()));
+            i--;
+        }
+    }
+
+    // Draw hull
+    for(unsigned int i = 0; i < hull.size(); i++){
+        sf::Vector2f p1 = hull[i];
+        Interface::Renderer::drawPoint(p1, 0.5f, sf::Color::Red);
     }
 
     points = hull;
@@ -231,7 +252,7 @@ sf::Vector2f Planet::getCenter(){
 
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    //calculateMesh();
+    calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }

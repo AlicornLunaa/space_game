@@ -31,9 +31,8 @@ namespace Objects {
         /**
          * @brief Converts the mesh into triangles
          * @param points 
-         * @return std::vector<sf::Vector2f> 
          */
-        std::vector<sf::Vector2f> triangulate(std::vector<double>& points);
+        void convertToCollider(std::vector<sf::Vector2f>& points);
 
         /**
          * @brief Convert to convex hull
