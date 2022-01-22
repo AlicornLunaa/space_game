@@ -6,9 +6,9 @@
 #pragma once
 #include <vector>
 #include <SFML/Graphics.hpp>
-#include "collider.h"
-#include "rigidbody.h"
-#include "../util/debugger.h"
+#include "colliders.h"
+#include "collisionbody.h"
+#include "../interface/renderer.h"
 #include "../util/vec_math.h"
 
 namespace Phys {
@@ -16,14 +16,13 @@ namespace Phys {
     class Engine : public sf::Drawable {
     private:
         // Variables
-        std::vector<Collider*> colliders;
+        std::vector<CollisionBody*> bodies;
         std::vector<CollisionData> collisions;
         bool renderDebug; // Displays boxes and vectors
 
         // Functions
-        bool collidesAABB(Collider* c1, Collider* c2);
-        bool collidesDIAG(Collider* c1, Collider* c2);
-        bool collidesSAT(Collider* c1, Collider* c2);
+        bool collidesAABB(CollisionBody* c1, CollisionBody* c2);
+        bool collidesSAT(CollisionBody* body1, CollisionBody* body2);
 
         void collisionDetection();
         void collisionResolution();
@@ -38,7 +37,7 @@ namespace Phys {
          * @param c The collider to add
          * @return unsigned int The ID of the collider
          */
-        unsigned int registerCollider(Collider* c);
+        unsigned int registerBody(CollisionBody* c);
 
         /**
          * @brief Removes the collider from the engine
@@ -46,14 +45,14 @@ namespace Phys {
          * @return true Removed successfully
          * @return false Collider does not exist
          */
-        bool unregisterCollider(unsigned int id);
+        bool unregisterBody(unsigned int id);
 
         /**
          * @brief Get the Collider object
          * @param id 
          * @return Collider* 
          */
-        Collider* getCollider(unsigned int id);
+        CollisionBody* getBody(unsigned int id);
 
         /**
          * @brief Get the RigidBody object

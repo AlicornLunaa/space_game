@@ -15,7 +15,7 @@ namespace Vehicles {
         sf::Texture tex;
         sf::Image body; // Image will contain the pixel data used to represent a fully modifiable ship
         
-        Phys::BoxRigidBody* rigidbody;
+        Phys::RigidBody* rigidbody;
 
     public:
         Vehicle(Phys::Engine& engine, float x, float y, unsigned int width, unsigned int height, unsigned int scale = 4u);

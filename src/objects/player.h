@@ -16,7 +16,7 @@ namespace Objects {
     private:
         // Variables
         sf::Texture tex;
-        Phys::BoxRigidBody* rigidbody;
+        Phys::RigidBody* rigidbody;
 
         bool driving;
         Vehicles::Vehicle* vehicle;

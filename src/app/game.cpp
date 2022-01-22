@@ -20,8 +20,6 @@ void Game::start(){
     planet = new Objects::Planet(engine, 0, 0, 16.f, "./res/textures/planet.png");
     player.create(engine, 600, 100);
     ship = new Vehicles::Ship(engine, 900, 300);
-
-    ship->getRigidBody()->acceleration.y = 0.f;
 }
 
 void Game::event(){

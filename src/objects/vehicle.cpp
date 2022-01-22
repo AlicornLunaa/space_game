@@ -11,8 +11,8 @@ Vehicle::Vehicle(Phys::Engine& engine, float x, float y, unsigned int width, uns
     setSize(sf::Vector2f(width, height) * (float)scale);
     setOrigin(sf::Vector2f(width, height) * (float)scale * 0.5f);
 
-    rigidbody = new Phys::BoxRigidBody(x, y, width, height, 0.f);
-    engine.registerCollider(rigidbody);
+    rigidbody = Phys::RigidBody::createBoxRigidBody(x, y, width, height, 0.f);
+    engine.registerBody(rigidbody);
 }
 
 Vehicle::~Vehicle(){

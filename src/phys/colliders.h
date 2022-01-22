@@ -12,41 +12,26 @@ namespace Phys {
 
     class Collider : public sf::Transformable {
     private:
+        // Variables
         std::vector<sf::Vector2f> points;
-        bool sleeping;
-        bool enabled;
-        bool mStatic;
 
     public:
+        // Constructors
         Collider(float x, float y, float rotation);
+        Collider();
         ~Collider();
+        void create(float x, float y, float rotation);
         
-        bool isSleeping();
-        void setSleeping(bool s);
-        bool isEnabled();
-        void setEnabled(bool e);
-        bool isStatic();
-        void setStatic(bool s);
+        // Functions
         void addPoint(float x, float y);
         void clearPoints();
         sf::Vector2f getPoint(unsigned int i);
-        sf::Vector2f getPointGlobal(unsigned int i);
         unsigned int getPointCount();
         sf::Vector2f getUp();
         sf::Vector2f getRight();
-    };
 
-    class BoxCollider : public Collider {
-    public:
-        BoxCollider(float x, float y, float w, float h, float rotation = 0.f);
-    };
-
-    struct CollisionData {
-        Collider* c1;
-        Collider* c2;
-        sf::Vector2f normal;
-        float displacement;
-        unsigned int contactPoint;
+        // Static functions
+        static Collider createBoxCollider(float x, float y, float w, float h, float rotation = 0.f);
     };
 
 };

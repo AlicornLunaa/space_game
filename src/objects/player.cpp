@@ -15,8 +15,8 @@ void Player::create(Phys::Engine& engine, float x, float y){
     setSize(sf::Vector2f(16, 32));
     setOrigin(getSize() * 0.5f);
 
-    rigidbody = new Phys::BoxRigidBody(x, y, 16, 32, 0.f);
-    engine.registerCollider(rigidbody);
+    rigidbody = Phys::RigidBody::createBoxRigidBody(x, y, 16, 32, 0.f);
+    engine.registerBody(rigidbody);
 
     driving = false;
     vehicle = NULL;
@@ -49,7 +49,7 @@ Phys::RigidBody* Player::getRigidBody(){ return rigidbody; }
 // Physics functions
 void Player::update(float deltaTime){
     // Parent the vehicle to the player if driving
-    rigidbody->setEnabled(true);
+    rigidbody->enabled = true;
     
     if(isDriving()){
         Vehicles::Vehicle* v = getVehicle();
@@ -57,7 +57,7 @@ void Player::update(float deltaTime){
 
         rigidbody->setPosition(v->getPosition());
         rigidbody->setRotation(v->getRotation());
-        rigidbody->setEnabled(false);
+        rigidbody->enabled = false;
     }
 
     updateKeys(deltaTime);
