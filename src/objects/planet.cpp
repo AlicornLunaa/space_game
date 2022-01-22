@@ -60,7 +60,7 @@ void Planet::calculateMesh(){
     }
 
     cleanupMesh(points);
-    //convertMesh(points);
+    convertMesh(points);
     convertToCollider(points);
 
     // Create collision mesh
@@ -73,7 +73,7 @@ void Planet::calculateMesh(){
 void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
     // Convert to triangles to use with the collision detection
     std::vector<std::vector<std::array<float, 2>>> polygon;
-    polygon.push_back({}); // First array
+    polygon.push_back({}); // First array is the polygon
 
     for(sf::Vector2f p : points){
         polygon.back().push_back({ p.x, p.y });
@@ -216,7 +216,7 @@ Planet::~Planet(){}
 
 void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigned int radius){
     // Create a default planet with the given radius
-    planetData.create(radius * 2, radius * 2, sf::Color(0, 100, 0));
+    planetData.create(radius * 2, radius * 2, sf::Color(0, 0, 0, 0));
     reloadTexture();
 
     setPosition(x, y);
@@ -252,7 +252,7 @@ sf::Vector2f Planet::getCenter(){
 
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    calculateMesh();
+    //calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }
