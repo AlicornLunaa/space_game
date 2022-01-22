@@ -60,18 +60,8 @@ void Planet::calculateMesh(){
     }
 
     cleanupMesh(points);
-    convertMesh(points);
+    //convertMesh(points);
     convertToCollider(points);
-
-    /**
-     * TODO: FINISH
-     * 
-     */
-    // Create collision mesh
-    // rigidbody->clearColliders();
-    // for(sf::Vector2f p1 : points){
-    //     rigidbody->addPoint(p1.x, p1.y);
-    // }
 }
 
 void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
@@ -83,14 +73,21 @@ void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
         polygon.back().push_back({ p.x, p.y });
     }
 
+    // Remove original colliders
+    rigidbody->clearColliders();
+
     std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
     for(unsigned int i = 0; i < indices.size(); i += 3){
         sf::Vector2f p1 = points[indices[i]];
         sf::Vector2f p2 = points[indices[i + 1]];
         sf::Vector2f p3 = points[indices[i + 2]];
-        Interface::Renderer::drawLine(p1, p2);
-        Interface::Renderer::drawLine(p2, p3);
-        Interface::Renderer::drawLine(p3, p1);
+        
+        // Add new collider for each triangle
+        Phys::Collider c;
+        c.addPoint(p1.x, p1.y);
+        c.addPoint(p2.x, p2.y);
+        c.addPoint(p3.x, p3.y);
+        rigidbody->addCollider(c);
     }
 }
 
@@ -149,6 +146,14 @@ void Planet::convertMesh(std::vector<sf::Vector2f>& points){
     }
 
     points = hull;
+
+    // Create collision mesh
+    rigidbody->clearColliders();
+    Phys::Collider c;
+    for(sf::Vector2f p1 : points){
+        c.addPoint(p1.x, p1.y);
+    }
+    rigidbody->addCollider(c);
 }
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
@@ -207,7 +212,7 @@ void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     // Draw hull
     for(unsigned int i = 0; i < hull.size(); i++){
         sf::Vector2f p1 = hull[i];
-        Interface::Renderer::drawPoint(p1, 0.5f, sf::Color::Red);
+        Interface::Renderer::drawPoint(p1 * getScale().x + getPosition(), 0.5f, sf::Color::Red);
     }
 
     points = hull;

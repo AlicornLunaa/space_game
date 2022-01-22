@@ -22,7 +22,7 @@ namespace Phys {
 
         // Functions
         bool collidesAABB(CollisionBody* c1, CollisionBody* c2);
-        bool collidesSAT(CollisionBody* body1, CollisionBody* body2);
+        bool collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, int id2);
 
         void collisionDetection();
         void collisionResolution();

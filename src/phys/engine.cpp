@@ -20,7 +20,7 @@ bool Engine::collidesAABB(CollisionBody* c1, CollisionBody* c2){
     return (p1.x - s1.x <= p2.x + s2.x && p1.x + s1.x >= p2.x - s2.x && p1.y - s1.y <= p2.y + s2.y && p1.y + s1.y >= p2.y - s2.y);
 }
 
-bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2){
+bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, int id2){
     // Store collision
     CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY, 0 };
 
@@ -78,7 +78,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2){
     if(body1->getCollidersSize() == 0 || body2->getCollidersSize() == 0) return false;
 
     // Commence check
-    bool collided = check(body1, body2, 0, 0, data, 1) && check(body2, body1, 0, 0, data, -1);
+    bool collided = check(body1, body2, id1, id2, data, 1) && check(body2, body1, id2, id1, data, -1);
     
     if(collided){
         collisions.push_back(data);
@@ -116,7 +116,12 @@ void Engine::collisionDetection(){
             //if(!collidesAABB(colliders[i], colliders[j])) continue;
 
             // Narrow phase
-            if(!collidesSAT(getBody(i), getBody(j))) continue;
+            // Test every collider
+            for(unsigned int k = 0; k < getBody(i)->getCollidersSize(); k++){
+                for(unsigned int l = 0; l < getBody(j)->getCollidersSize(); l++){
+                    collidesSAT(getBody(i), getBody(j), k, l);
+                }
+            }
         }
     }
 }
