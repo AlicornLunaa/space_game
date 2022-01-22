@@ -241,6 +241,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigne
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());
     rigidbody->mStatic = true;
+    rigidbody->mass = 10000000.f;
     calculateMesh();
 
     engine.registerBody(rigidbody);
@@ -258,6 +259,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, float scale, std::st
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());
     rigidbody->mStatic = true;
+    rigidbody->mass = 10000000.f;
     calculateMesh();
     
     engine.registerBody(rigidbody);

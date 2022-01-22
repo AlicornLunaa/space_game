@@ -16,6 +16,8 @@ void Player::create(Phys::Engine& engine, float x, float y){
     setOrigin(getSize() * 0.5f);
 
     rigidbody = Phys::RigidBody::createBoxRigidBody(x, y, 16, 32, 0.f);
+    rigidbody->mass = 10.f;
+    rigidbody->elasticity = 0.25f;
     engine.registerBody(rigidbody);
 
     driving = false;
@@ -25,10 +27,10 @@ void Player::create(Phys::Engine& engine, float x, float y){
 // Private functions
 void Player::updateKeys(float deltaTime){
     // Controls
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->acceleration += rigidbody->getRight() * -8.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->acceleration += rigidbody->getRight() * 8.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->acceleration += rigidbody->getUp() * 14.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->acceleration += rigidbody->getUp() * -14.f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->force += rigidbody->getRight() * -800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->force += rigidbody->getRight() * 800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 1400.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -1400.f * rigidbody->mass; }
 }
 
 // Vehicle functions

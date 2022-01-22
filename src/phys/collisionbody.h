@@ -39,10 +39,11 @@ namespace Phys {
     public:
         // Rigidbody properties
         sf::Vector2f velocity;
-        sf::Vector2f acceleration;
+        sf::Vector2f force;
         float rotVelocity;
-        float rotAcceleration;
+        float rotForce;
         float mass;
+        float elasticity;
 
         // Constructors
         RigidBody(float x, float y, float rotation);

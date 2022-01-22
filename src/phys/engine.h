@@ -26,8 +26,8 @@ namespace Phys {
         bool collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, int id2);
 
         void collisionDetection();
-        void collisionResolution();
-        void physicsUpdate();
+        void collisionResolution(float deltaTime);
+        void physicsUpdate(float deltaTime);
 
     public:
         Engine();

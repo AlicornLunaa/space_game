@@ -126,7 +126,7 @@ void Engine::collisionDetection(){
     }
 }
 
-void Engine::collisionResolution(){
+void Engine::collisionResolution(float deltaTime){
     // Fix all the collisions
     for(CollisionData& data : collisions){
         // Solve collision
@@ -144,39 +144,47 @@ void Engine::collisionResolution(){
         RigidBody* r2 = dynamic_cast<RigidBody*>(data.c2);
 
         // Update velocities
-        if(r1 != NULL){
-            r1->velocity = Math::reflect(r1->velocity, data.normal) * 0.5f;
-        }
+        if(r1 != NULL && r2 != NULL){
+            // Both valid
+            sf::Vector2f relativeVelocity = r2->velocity - r1->velocity;
+            float velocityProj = Math::dot(relativeVelocity, data.normal);
+            float restitution = std::min(r1->elasticity, r2->elasticity);
+            float scale = (-(1 + restitution) * velocityProj) / (1.f / r1->mass + 1.f / r2->mass);
+            sf::Vector2f impulse = data.normal * scale;
 
-        if(r2 != NULL){
-            r2->velocity = Math::reflect(r2->velocity, data.normal) * 0.5f;
+            if(velocityProj > 0) continue;
+            
+            r1->velocity -= (1.f / r1->mass) * impulse;
+            r2->velocity += (1.f / r2->mass) * impulse;
         }
     }
 
     collisions.clear();
 }
 
-void Engine::physicsUpdate(){
+void Engine::physicsUpdate(float deltaTime){
     // Update each body
     for(CollisionBody* b : bodies){
         // Update only rigidbodies
         RigidBody* rb = dynamic_cast<RigidBody*>(b);
         if(rb == NULL) continue;
 
-        // Update position and other variables
-        rb->velocity += rb->acceleration;
-        rb->rotVelocity += rb->rotAcceleration;
-        rb->move(rb->velocity);
-        rb->rotate(rb->rotVelocity);
-        rb->acceleration *= 0.f;
-        rb->rotAcceleration *= 0.f;
+        // Update body dynamics
+        rb->velocity += rb->force / rb->mass * deltaTime;
+        rb->rotVelocity += rb->rotForce / rb->mass * deltaTime;
+
+        rb->move(rb->velocity * deltaTime);
+        rb->rotate(rb->rotVelocity * deltaTime);
+        
+        rb->force *= 0.f;
+        rb->rotForce *= 0.f;
     }
 }
 
 void Engine::update(float deltaTime){
     collisionDetection();
-    collisionResolution();
-    physicsUpdate();
+    collisionResolution(deltaTime);
+    physicsUpdate(deltaTime);
 }
 
 void Engine::draw(sf::RenderTarget& target, sf::RenderStates states) const {

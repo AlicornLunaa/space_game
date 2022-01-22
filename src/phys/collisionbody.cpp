@@ -35,10 +35,11 @@ sf::Vector2f CollisionBody::getRight(){ return sf::Vector2f(std::cos(getRotation
 RigidBody::RigidBody(float x, float y, float rotation) : CollisionBody(x, y, rotation){
     // Initialize physics properties
     velocity = sf::Vector2f(0.f, 0.f);
-    acceleration = sf::Vector2f(0.f, 0.f);
+    force = sf::Vector2f(0.f, 0.f);
     rotVelocity = 0.f;
-    rotAcceleration = 0.f;
+    rotForce = 0.f;
     mass = 1.f;
+    elasticity = 0.5f;
 }
 
 RigidBody::~RigidBody(){}

@@ -32,16 +32,18 @@ Ship::Ship(Phys::Engine& engine, float x, float y) : Vehicle(engine, x, y, 32, 6
     // Initialize a ship
     body.loadFromFile("./res/textures/ship.png");
     updateTexture();
+
+    rigidbody->mass = 100.f;
 }
 
 Ship::~Ship(){}
 
 void Ship::updateKeys(float deltaTime){
     // Controls
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->acceleration = rigidbody->getUp() * 10.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->acceleration = rigidbody->getUp() * -10.f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->rotAcceleration = -2.5f * deltaTime; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->rotAcceleration = 2.5f * deltaTime; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->rotForce += -250.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->rotForce += 250.f * rigidbody->mass; }
 }
 
 void Ship::update(float deltaTime){
