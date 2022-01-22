@@ -77,6 +77,22 @@ namespace Objects {
         sf::Vector2f getCenter();
 
         /**
+         * @brief Returns the pixel at the location given
+         * @param x 
+         * @param y 
+         * @return sf::Color 
+         */
+        sf::Color getPixel(float x, float y);
+
+        /**
+         * @brief Sets the pixel at the position to a specific color
+         * @param x 
+         * @param y 
+         * @param color 
+         */
+        void setPixel(float x, float y, sf::Color color);
+
+        /**
          * @brief Updates the planet
          * @param deltaTime 
          */

@@ -261,6 +261,30 @@ sf::Vector2f Planet::getCenter(){
     return getPosition() + getSize() * (getScale().x / 2);
 }
 
+sf::Color Planet::getPixel(float x, float y){
+    // Convert given position to image-local
+    sf::Vector2i pos = (sf::Vector2i)getInverseTransform().transformPoint(x, y);
+
+    // Bounds check it
+    if(pos.x < 0 || pos.x > getSize().x || pos.y < 0 || pos.y > getSize().y) return sf::Color(0, 0, 0, 0);
+
+    // Return the color
+    return planetData.getPixel(pos.x, pos.y);
+}
+
+void Planet::setPixel(float x, float y, sf::Color color){
+    // Convert given position to image-local
+    sf::Vector2i pos = (sf::Vector2i)getInverseTransform().transformPoint(x, y);
+
+    // Bounds check it
+    if(pos.x < 0 || pos.x > getSize().x || pos.y < 0 || pos.y > getSize().y) return;
+
+    // Select it
+    planetData.setPixel(pos.x, pos.y, color);
+    reloadTexture();
+    calculateMesh();
+}
+
 void Planet::update(float deltaTime){
     // Update everything on the planet
     //calculateMesh();

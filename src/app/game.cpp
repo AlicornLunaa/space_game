@@ -51,14 +51,22 @@ void Game::frame(){
     parallaxEffect.setCameraPosition(player.getPosition());
 
     // Player gravity
-    // sf::Vector2f planetToPlayer = Math::normalize(player.getPosition() - planet->getCenter());
-    // float plyRot = std::atan2(planetToPlayer.y, planetToPlayer.x) * (180 / 3.1415) + 90;
-    // worldCamera.setRotation(plyRot);
-    // player.getRigidBody()->setRotation(plyRot);
-    // player.getRigidBody()->acceleration += planetToPlayer * -9.8f * deltaTime;
+    sf::Vector2f planetToPlayer = Math::normalize(player.getPosition() - planet->getCenter());
+    float plyRot = std::atan2(planetToPlayer.y, planetToPlayer.x) * (180 / 3.1415) + 90;
+    worldCamera.setRotation(plyRot);
+    player.getRigidBody()->setRotation(plyRot);
+    player.getRigidBody()->acceleration += planetToPlayer * -9.8f * deltaTime;
     
-    // sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - planet->getCenter());
-    // ship->getRigidBody()->acceleration += planetToShip * -9.8f * deltaTime;
+    sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - planet->getCenter());
+    ship->getRigidBody()->acceleration += planetToShip * -9.8f * deltaTime;
+
+    if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
+        sf::Vector2f pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        planet->setPixel(pos.x, pos.y, sf::Color::Red);
+    } else if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)){
+        sf::Vector2f pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+        planet->setPixel(pos.x, pos.y, sf::Color(0, 0, 0, 0));
+    }
 
     // HUD rendering
     window.setView(hudCamera);
