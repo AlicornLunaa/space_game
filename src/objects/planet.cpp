@@ -11,7 +11,6 @@ void Planet::calculateMesh(){
     // Get data
     sf::Vector2u size = planetData.getSize();
     std::vector<sf::Vector2f> points;
-    std::vector<double> pointsRaw;
 
     // Start marching squares from top-left down iteration path
     for(unsigned int x = 0; x < size.x; x++){
@@ -22,11 +21,12 @@ void Planet::calculateMesh(){
             // Check neighbors
             unsigned int threshold = 0;
             unsigned int state = 0;
-            bool edge = (x == 0) || (x == size.x - 1) || (y == 0) || (y == size.y - 1) || (pixel.a <= threshold);
-            bool left = edge || (planetData.getPixel(x - 1, y).a <= threshold);
-            bool right = edge || (planetData.getPixel(x + 1, y).a <= threshold);
-            bool top = edge || (planetData.getPixel(x, y - 1).a <= threshold);
-            bool bottom = edge || (planetData.getPixel(x, y + 1).a <= threshold);
+            bool edge = ((x == 0) || (x == size.x - 1) || (y == 0) || (y == size.y - 1));
+            bool left = edge || (planetData.getPixel(x - 1, y).a > threshold);
+            bool right = edge || (planetData.getPixel(x + 1, y).a > threshold);
+            bool top = edge || (planetData.getPixel(x, y - 1).a > threshold);
+            bool bottom = edge || (planetData.getPixel(x, y + 1).a > threshold);
+            bool selfValid = pixel.a > threshold;
 
             if(top){
                 // 0 and 1 get activated
@@ -53,10 +53,16 @@ void Planet::calculateMesh(){
             }
 
             // Outline the shape if its not surrounded on every side and has at least one neighbor
-            if(state != 0 && state != 15 && (top ^ right ^ bottom ^ left)){
+            if(selfValid && state != 15 && state != 0){
                 points.push_back(sf::Vector2f(x + 0.5f, y + 0.5f));
             }
         }
+    }
+    
+    // Draw shape
+    for(unsigned int i = 0; i < points.size(); i++){
+        sf::Vector2f p1 = points[i];
+        Interface::Renderer::drawPoint(p1 * getScale().x + getPosition(), 1.f, sf::Color::Yellow);
     }
 
     cleanupMesh(points);
@@ -212,7 +218,7 @@ void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     // Draw hull
     for(unsigned int i = 0; i < hull.size(); i++){
         sf::Vector2f p1 = hull[i];
-        Interface::Renderer::drawPoint(p1 * getScale().x + getPosition(), 0.5f, sf::Color::Red);
+        Interface::Renderer::drawPoint(p1 * getScale().x + getPosition(), 2.f, sf::Color::Red);
     }
 
     points = hull;
@@ -287,7 +293,7 @@ void Planet::setPixel(float x, float y, sf::Color color){
 
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    //calculateMesh();
+    calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }

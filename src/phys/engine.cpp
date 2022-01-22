@@ -60,8 +60,8 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             }
 
             // Get overlap data to respond
-            float currentOverlap = max1 - min2;
-            if(currentOverlap < data.displacement && currentOverlap != 0){
+            float currentOverlap = std::max(max2, min2) - std::min(max1, min1);
+            if(currentOverlap < data.displacement){
                 data.normal = normal * scalar;
                 data.displacement = currentOverlap;
                 data.contactPoint = i;
@@ -78,7 +78,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
     if(body1->getCollidersSize() == 0 || body2->getCollidersSize() == 0) return false;
 
     // Commence check
-    bool collided = check(body1, body2, id1, id2, data, 1) && check(body2, body1, id2, id1, data, -1);
+    bool collided = check(body1, body2, id1, id2, data, -1) && check(body2, body1, id2, id1, data, 1);
     
     if(collided){
         collisions.push_back(data);
@@ -113,7 +113,7 @@ void Engine::collisionDetection(){
         for(unsigned int j = i + 1; j < bodies.size(); j++){
             // Broadphase
             if(!getBody(i)->enabled || !getBody(j)->enabled) continue;
-            //if(!collidesAABB(colliders[i], colliders[j])) continue;
+            //if(!collidesAABB(getBody(i), getBody(j))) continue;
 
             // Narrow phase
             // Test every collider
@@ -130,15 +130,14 @@ void Engine::collisionResolution(){
     // Fix all the collisions
     for(CollisionData& data : collisions){
         // Solve collision
-        if(!data.c1->mStatic){
+        if(!data.c1->mStatic && !data.c2->mStatic){
+            data.c1->move(data.normal * data.displacement * -0.5f);
+            data.c2->move(data.normal * data.displacement * 0.5f);
+        } else if(data.c1->mStatic){
+            data.c2->move(data.normal * data.displacement * 1.f);
+        } else {
             data.c1->move(data.normal * data.displacement * -1.f);
         }
-        if(!data.c2->mStatic){
-            data.c2->move(data.normal * data.displacement * 1.f);
-        }
-
-        Interface::Renderer::drawPoint(data.c1->getPosition());
-        Interface::Renderer::drawPoint(data.c2->getPosition());
 
         // Check if the collider is also a rigidbody
         RigidBody* r1 = dynamic_cast<RigidBody*>(data.c1);
