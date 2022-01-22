@@ -27,6 +27,10 @@ sf::Vector2f CollisionBody::getPointOnCollider(unsigned int collider, unsigned i
     return getTransform().transformPoint(p);
 }
 
+sf::Vector2f CollisionBody::getCenter(){
+    return getPosition();
+}
+
 sf::Vector2f CollisionBody::getUp(){ return sf::Vector2f(std::cos((getRotation() - 90) * (3.1415 / 180)), std::sin((getRotation() - 90) * (3.1415 / 180))); }
 sf::Vector2f CollisionBody::getRight(){ return sf::Vector2f(std::cos(getRotation() * (3.1415 / 180)), std::sin(getRotation() * (3.1415 / 180))); }
 
@@ -37,8 +41,9 @@ RigidBody::RigidBody(float x, float y, float rotation) : CollisionBody(x, y, rot
     velocity = sf::Vector2f(0.f, 0.f);
     force = sf::Vector2f(0.f, 0.f);
     rotVelocity = 0.f;
-    rotForce = 0.f;
+    torque = 0.f;
     mass = 1.f;
+    inertia = 1.f;
     elasticity = 0.5f;
 }
 

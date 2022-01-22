@@ -31,6 +31,7 @@ namespace Phys {
         void clearColliders();
         sf::Vector2f getPointOnCollider(unsigned int collider, unsigned int point);
         
+        sf::Vector2f getCenter();
         sf::Vector2f getUp();
         sf::Vector2f getRight();
     };
@@ -41,8 +42,9 @@ namespace Phys {
         sf::Vector2f velocity;
         sf::Vector2f force;
         float rotVelocity;
-        float rotForce;
+        float torque;
         float mass;
+        float inertia;
         float elasticity;
 
         // Constructors

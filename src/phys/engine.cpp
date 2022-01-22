@@ -30,6 +30,8 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
 
+        float maximumDepth = -INFINITY;
+
         // Loop through every edge
         for(unsigned int i = 0; i < c1.getPointCount(); i++){
             // Get the edge of the face
@@ -64,6 +66,9 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             if(currentOverlap < data.displacement){
                 data.normal = normal * scalar;
                 data.displacement = currentOverlap;
+            }
+            if(currentOverlap > maximumDepth){
+                maximumDepth = currentOverlap;
                 data.contactPoint = i;
             }
 
@@ -145,17 +150,29 @@ void Engine::collisionResolution(float deltaTime){
 
         // Update velocities
         if(r1 != NULL && r2 != NULL){
+            // Get radius for the point being hit
+            // sf::Vector2f contact = r1->getCollider(0).getPoint(data.contactPoint);
+            // sf::Vector2f radius1 = contact - r1->getCenter();
+            // sf::Vector2f radius2 = contact - r2->getCenter();
+
             // Both valid
             sf::Vector2f relativeVelocity = r2->velocity - r1->velocity;
             float velocityProj = Math::dot(relativeVelocity, data.normal);
             float restitution = std::min(r1->elasticity, r2->elasticity);
-            float scale = (-(1 + restitution) * velocityProj) / (1.f / r1->mass + 1.f / r2->mass);
+            float scale = (-(1 + restitution) * velocityProj) / (1.f / r1->mass + 1.f / r2->mass);/* + std::pow(Math::cross(radius1, data.normal).z, 2) / r1->inertia + std::pow(Math::cross(radius2, data.normal).z, 2) / r2->inertia);*/
             sf::Vector2f impulse = data.normal * scale;
 
             if(velocityProj > 0) continue;
             
-            r1->velocity -= (1.f / r1->mass) * impulse;
-            r2->velocity += (1.f / r2->mass) * impulse;
+            if(!r1->mStatic){
+                r1->velocity -= (1.f / r1->mass) * impulse;
+                //r1->rotVelocity -= (1.f / r1->inertia) * Math::cross(contact, impulse).z;
+            }
+
+            if(!r2->mStatic){
+                r2->velocity += (1.f / r2->mass) * impulse;
+                //r2->rotVelocity += (1.f / r2->inertia) * Math::cross(contact, impulse).z;
+            }
         }
     }
 
@@ -171,13 +188,13 @@ void Engine::physicsUpdate(float deltaTime){
 
         // Update body dynamics
         rb->velocity += rb->force / rb->mass * deltaTime;
-        rb->rotVelocity += rb->rotForce / rb->mass * deltaTime;
+        rb->rotVelocity += rb->torque / rb->mass * deltaTime;
 
         rb->move(rb->velocity * deltaTime);
         rb->rotate(rb->rotVelocity * deltaTime);
         
         rb->force *= 0.f;
-        rb->rotForce *= 0.f;
+        rb->torque *= 0.f;
     }
 }
 
