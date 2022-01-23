@@ -43,8 +43,10 @@ RigidBody::RigidBody(float x, float y, float rotation) : CollisionBody(x, y, rot
     rotVelocity = 0.f;
     torque = 0.f;
     mass = 1.f;
-    inertia = 0.000001f;
+    inertia = 10.f;
     elasticity = 0.2f;
+    staticFriction = 0.009f;
+    dynamicFriction = 0.006f;
 }
 
 RigidBody::~RigidBody(){}

@@ -189,17 +189,29 @@ void Engine::collisionResolution(float deltaTime){
 
                 // Both valid
                 float rotationLoss = (std::pow(Math::cross(radius1, data.normal).z, 2) * (1.f / r1->inertia) + std::pow(Math::cross(radius2, data.normal).z, 2) * (1.f / r2->inertia));
-                relativeVelocity = r2->velocity + Math::cross(r2->rotVelocity, radius2) - r1->velocity - Math::cross(r1->rotVelocity, radius1);
-                velocityProj = Math::dot(relativeVelocity, data.normal);
-                scale = (-(1 + restitution) * velocityProj) / massLoss / rotationLoss / data.contactPoints.size();
+                sf::Vector2f rv = relativeVelocity + Math::cross(r2->rotVelocity * (3.1415f / 180), radius2) - Math::cross(r1->rotVelocity * (3.1415f / 180), radius1);
+                velocityProj = Math::dot(rv, data.normal);
+                scale = (-(1 + restitution) * velocityProj) / (massLoss + rotationLoss) / data.contactPoints.size();
                 sf::Vector2f impulse = data.normal * scale;
 
                 Interface::Renderer::drawPoint(contact);
-                Interface::Renderer::drawLine(contact, contact + impulse);
+                Interface::Renderer::drawLine(contact, contact + impulse * 10.f);
 
                 if(velocityProj > 0) continue;
                 if(!r1->mStatic){ r1->applyImpulse(-impulse, radius1); }
                 if(!r2->mStatic){ r2->applyImpulse(impulse, radius2); }
+
+                // Friction impulse
+                // rv = relativeVelocity + Math::cross(r2->rotVelocity * (3.1415f / 180), radius2) - Math::cross(r1->rotVelocity * (3.1415f / 180), radius1);
+                // sf::Vector2f t = rv - (data.normal * Math::dot(rv, data.normal));
+                // float jt = -Math::dot(rv, t);
+                // jt /= (massLoss + rotationLoss);
+                // jt /= data.contactPoints.size();
+
+                // if(jt == 0.f) continue;
+                // impulse = (std::abs(jt) < scale * std::sqrt(r1->staticFriction * r2->staticFriction)) ? (t * jt) : (t * -scale * std::sqrt(r1->dynamicFriction * r2->dynamicFriction));
+                // if(!r1->mStatic){ r1->applyImpulse(-impulse, radius1); }
+                // if(!r2->mStatic){ r2->applyImpulse(impulse, radius2); }
             }
         }
     }

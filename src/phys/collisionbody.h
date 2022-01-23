@@ -47,6 +47,8 @@ namespace Phys {
         float mass;
         float inertia;
         float elasticity;
+        float staticFriction;
+        float dynamicFriction;
 
         // Constructors
         RigidBody(float x, float y, float rotation);
