@@ -22,23 +22,23 @@ bool Engine::collidesAABB(CollisionBody* c1, CollisionBody* c2){
 
 bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, int id2){
     // Store collision
-    CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY, 0 };
+    CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY, sf::Vector2f(0, 0) };
 
     // Define function
     auto check = [](CollisionBody* b1, CollisionBody* b2, int id1, int id2, CollisionData& data, float scalar){
         // Get colliders
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
-
-        float maximumDepth = -INFINITY;
+        
+        std::vector<sf::Vector2f> contactPoints;
 
         // Loop through every edge
         for(unsigned int i = 0; i < c1.getPointCount(); i++){
             // Get the edge of the face
             sf::Vector2f p1 = b1->getPointOnCollider(id1, i);
             sf::Vector2f p2 = b1->getPointOnCollider(id1, (i + 1) % c1.getPointCount());
-            sf::Vector2f edge = p2 - p1;
-            sf::Vector2f normal = Math::perpendicular(Math::normalize(edge));
+            sf::Vector2f center = b1->getTransform().transformPoint(c1.getPosition());
+            sf::Vector2f normal = Math::perpendicular(Math::normalize(p2 - p1));
 
             // Edge data
             float min1 = INFINITY;
@@ -61,19 +61,43 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
                 max2 = std::max(proj, max2);
             }
 
+            // Run through every diagonal-edge intersection
+            for(unsigned int j = 0; j < c2.getPointCount(); j++){
+                sf::Vector2f s = b2->getPointOnCollider(id2, j);
+                sf::Vector2f e = b2->getPointOnCollider(id2, (j + 1) % c2.getPointCount());
+
+                float h = (e.x - s.x) * (center.y - p1.y) - (center.x - p1.x) * (e.y - s.y);
+                float t1 = ((s.y - e.y) * (center.x - s.x) + (e.x - s.x) * (center.y - s.y)) / h;
+                float t2 = ((center.y - p1.y) * (p1.x - s.x) + (p1.x - center.x) * (center.y - s.y)) / h;
+
+                if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
+                    // Intersection found, record the point
+                    contactPoints.push_back(p1);
+                    Interface::Renderer::drawPoint(p1);
+                }
+            }
+
             // Get overlap data to respond
             float currentOverlap = std::max(max2, min2) - std::min(max1, min1);
             if(currentOverlap < data.displacement){
                 data.normal = normal * scalar;
                 data.displacement = currentOverlap;
             }
-            if(currentOverlap > maximumDepth){
-                maximumDepth = currentOverlap;
-                data.contactPoint = i;
-            }
 
             // Check collision
             if(!(max2 >= min1 && max1 >= min2)) return false;
+        }
+
+        // Average contactpoints
+        if(contactPoints.size() > 0){
+            sf::Vector2f avg;
+
+            for(sf::Vector2f p : contactPoints){
+                avg += p;
+            }
+
+            avg /= (float)contactPoints.size();
+            data.contactPoint += avg;
         }
 
         return true;
@@ -151,27 +175,26 @@ void Engine::collisionResolution(float deltaTime){
         // Update velocities
         if(r1 != NULL && r2 != NULL){
             // Get radius for the point being hit
-            // sf::Vector2f contact = r1->getCollider(0).getPoint(data.contactPoint);
-            // sf::Vector2f radius1 = contact - r1->getCenter();
-            // sf::Vector2f radius2 = contact - r2->getCenter();
+            sf::Vector2f radius1 = data.contactPoint - r1->getCenter();
+            sf::Vector2f radius2 = data.contactPoint - r2->getCenter();
 
             // Both valid
             sf::Vector2f relativeVelocity = r2->velocity - r1->velocity;
             float velocityProj = Math::dot(relativeVelocity, data.normal);
             float restitution = std::min(r1->elasticity, r2->elasticity);
-            float scale = (-(1 + restitution) * velocityProj) / (1.f / r1->mass + 1.f / r2->mass);/* + std::pow(Math::cross(radius1, data.normal).z, 2) / r1->inertia + std::pow(Math::cross(radius2, data.normal).z, 2) / r2->inertia);*/
+            float scale = (-(1 + restitution) * velocityProj) / (1.f / r1->mass + 1.f / r2->mass + std::pow(Math::cross(radius1, data.normal).z, 2) / r1->inertia + std::pow(Math::cross(radius2, data.normal).z, 2) / r2->inertia);
             sf::Vector2f impulse = data.normal * scale;
 
             if(velocityProj > 0) continue;
             
             if(!r1->mStatic){
                 r1->velocity -= (1.f / r1->mass) * impulse;
-                //r1->rotVelocity -= (1.f / r1->inertia) * Math::cross(contact, impulse).z;
+                r1->rotVelocity -= (1.f / r1->inertia) * Math::cross(radius1, impulse).z * (180 / 3.1415);
             }
 
             if(!r2->mStatic){
                 r2->velocity += (1.f / r2->mass) * impulse;
-                //r2->rotVelocity += (1.f / r2->inertia) * Math::cross(contact, impulse).z;
+                r2->rotVelocity += (1.f / r2->inertia) * Math::cross(radius2, impulse).z * (180 / 3.1415);
             }
         }
     }
