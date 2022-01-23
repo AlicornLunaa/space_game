@@ -21,6 +21,7 @@ void Planet::calculateMesh(){
             // Check neighbors
             unsigned int threshold = 0;
             unsigned int state = 0;
+            unsigned int sides = 0;
             bool edge = ((x == 0) || (x == size.x - 1) || (y == 0) || (y == size.y - 1));
             bool left = edge || (planetData.getPixel(x - 1, y).a > threshold);
             bool right = edge || (planetData.getPixel(x + 1, y).a > threshold);
@@ -32,28 +33,32 @@ void Planet::calculateMesh(){
                 // 0 and 1 get activated
                 state |= (1UL << 0);
                 state |= (1UL << 1);
+                sides++;
             }
 
             if(right){
                 // 1 and 2 get activated
                 state |= (1UL << 1);
                 state |= (1UL << 2);
+                sides++;
             }
 
             if(bottom){
                 // 2 and 3 get activated
                 state |= (1UL << 2);
                 state |= (1UL << 3);
+                sides++;
             }
 
             if(left){
                 // 3 and 0 get activated
                 state |= (1UL << 3);
                 state |= (1UL << 0);
+                sides++;
             }
 
             // Outline the shape if its not surrounded on every side and has at least one neighbor
-            if(selfValid && state != 15 && state != 0){
+            if(selfValid && sides <= 3){
                 points.push_back(sf::Vector2f(x + 0.5f, y + 0.5f));
             }
         }
@@ -62,7 +67,7 @@ void Planet::calculateMesh(){
     // Draw shape
     for(unsigned int i = 0; i < points.size(); i++){
         sf::Vector2f p1 = points[i];
-        Interface::Renderer::drawPoint(p1 * getScale().x + getPosition(), 1.f, sf::Color::Yellow);
+        Interface::Renderer::drawPoint(p1 * getScale().x, 1.f, sf::Color::Yellow);
     }
 
     cleanupMesh(points);
@@ -155,7 +160,7 @@ void Planet::convertMesh(std::vector<sf::Vector2f>& points){
     for(unsigned int i = 0; i < hull.size(); i++){
         sf::Vector2f p1 = hull[i];
         sf::Vector2f p2 = hull[(i + 1) % hull.size()];
-        Interface::Renderer::drawLine(getPosition() + p1 * getScale().x, getPosition() + p2 * getScale().x, sf::Color::Yellow);
+        Interface::Renderer::drawLine(p1 * getScale().x, p2 * getScale().x, sf::Color::Yellow);
     }
 
     points = hull;
@@ -171,6 +176,7 @@ void Planet::convertMesh(std::vector<sf::Vector2f>& points){
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     // Run nearest neighbor algorithm
+    if(points.size() == 0) return;
     sf::Vector2 start = points[0];
     sf::Vector2f current = start;
     unsigned int index = 1;
@@ -225,7 +231,7 @@ void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
     // Draw hull
     for(unsigned int i = 0; i < hull.size(); i++){
         sf::Vector2f p1 = hull[i];
-        Interface::Renderer::drawPoint(p1 * getScale().x + getPosition(), 2.f, sf::Color::Red);
+        Interface::Renderer::drawPoint(p1 * getScale().x, 2.f, sf::Color::Red);
     }
 
     points = hull;

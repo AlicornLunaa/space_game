@@ -79,7 +79,6 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             if(currentOverlap < data.displacement){
                 data.normal = normal * scalar;
                 data.displacement = currentOverlap;
-                // ! Displacement is not calculated based on entire shape, but instead the single collider. Fix this.
             }
 
             // Check collision
