@@ -43,3 +43,7 @@ float Math::distanceSquare(sf::Vector2f v1, sf::Vector2f v2){
 sf::Vector3f Math::cross(sf::Vector2f v1, sf::Vector2f v2){
     return sf::Vector3f(0, 0, v1.x * v2.y - v1.y * v2.x);
 }
+
+sf::Vector2f Math::cross(float a, sf::Vector2f v){
+    return { -a * v.y, a * v.x };
+}

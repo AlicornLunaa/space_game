@@ -22,7 +22,7 @@ bool Engine::collidesAABB(CollisionBody* c1, CollisionBody* c2){
 
 bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, int id2){
     // Store collision
-    CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY, sf::Vector2f(0, 0) };
+    CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY };
 
     // Define function
     auto check = [](CollisionBody* b1, CollisionBody* b2, int id1, int id2, CollisionData& data, float scalar){
@@ -30,8 +30,6 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
         
-        std::vector<sf::Vector2f> contactPoints;
-
         // Loop through every edge
         for(unsigned int i = 0; i < c1.getPointCount(); i++){
             // Get the edge of the face
@@ -72,8 +70,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
 
                 if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
                     // Intersection found, record the point
-                    contactPoints.push_back(p1);
-                    Interface::Renderer::drawPoint(p1);
+                    data.contactPoints.push_back(b1->getPointOnCollider(id1, i));
                 }
             }
 
@@ -82,22 +79,11 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             if(currentOverlap < data.displacement){
                 data.normal = normal * scalar;
                 data.displacement = currentOverlap;
+                // ! Displacement is not calculated based on entire shape, but instead the single collider. Fix this.
             }
 
             // Check collision
             if(!(max2 >= min1 && max1 >= min2)) return false;
-        }
-
-        // Average contactpoints
-        if(contactPoints.size() > 0){
-            sf::Vector2f avg;
-
-            for(sf::Vector2f p : contactPoints){
-                avg += p;
-            }
-
-            avg /= (float)contactPoints.size();
-            data.contactPoint += avg;
         }
 
         return true;
@@ -159,13 +145,20 @@ void Engine::collisionResolution(float deltaTime){
     // Fix all the collisions
     for(CollisionData& data : collisions){
         // Solve collision
+        Interface::Renderer::drawText(10, 50, std::to_string(data.displacement));
+        Interface::Renderer::drawPoint(data.c1->getPosition());
+
+        float slop = 0.005f;
+        float percent = 0.9f;
+        sf::Vector2f correction = (std::max(data.displacement - slop, 0.f)) * data.normal * percent;
+
         if(!data.c1->mStatic && !data.c2->mStatic){
-            data.c1->move(data.normal * data.displacement * -0.5f);
-            data.c2->move(data.normal * data.displacement * 0.5f);
+            data.c1->move(-correction);
+            data.c2->move(correction);
         } else if(data.c1->mStatic){
-            data.c2->move(data.normal * data.displacement * 1.f);
+            data.c2->move(correction);
         } else {
-            data.c1->move(data.normal * data.displacement * -1.f);
+            data.c1->move(-correction);
         }
 
         // Check if the collider is also a rigidbody
@@ -174,27 +167,39 @@ void Engine::collisionResolution(float deltaTime){
 
         // Update velocities
         if(r1 != NULL && r2 != NULL){
-            // Get radius for the point being hit
-            sf::Vector2f radius1 = data.contactPoint - r1->getCenter();
-            sf::Vector2f radius2 = data.contactPoint - r2->getCenter();
-
-            // Both valid
+            // Velocity impulse
             sf::Vector2f relativeVelocity = r2->velocity - r1->velocity;
             float velocityProj = Math::dot(relativeVelocity, data.normal);
             float restitution = std::min(r1->elasticity, r2->elasticity);
-            float scale = (-(1 + restitution) * velocityProj) / (1.f / r1->mass + 1.f / r2->mass + std::pow(Math::cross(radius1, data.normal).z, 2) / r1->inertia + std::pow(Math::cross(radius2, data.normal).z, 2) / r2->inertia);
+            float massLoss = (1.f / r1->mass + 1.f / r2->mass);
+            float scale = (-(1 + restitution) * velocityProj) / massLoss;
             sf::Vector2f impulse = data.normal * scale;
 
             if(velocityProj > 0) continue;
-            
-            if(!r1->mStatic){
-                r1->velocity -= (1.f / r1->mass) * impulse;
-                r1->rotVelocity -= (1.f / r1->inertia) * Math::cross(radius1, impulse).z * (180 / 3.1415);
-            }
+            if(!r1->mStatic){ r1->applyImpulse(-impulse); }
+            if(!r2->mStatic){ r2->applyImpulse(impulse); }
 
-            if(!r2->mStatic){
-                r2->velocity += (1.f / r2->mass) * impulse;
-                r2->rotVelocity += (1.f / r2->inertia) * Math::cross(radius2, impulse).z * (180 / 3.1415);
+            // Contact based impulses
+            for(unsigned int i = 0; i < data.contactPoints.size(); i++){
+                // Rotational impulse
+                // Get radius for the point being hit
+                sf::Vector2f contact = data.contactPoints[i];
+                sf::Vector2f radius1 = contact - r1->getCenter();
+                sf::Vector2f radius2 = contact - r2->getCenter();
+
+                // Both valid
+                float rotationLoss = (std::pow(Math::cross(radius1, data.normal).z, 2) * (1.f / r1->inertia) + std::pow(Math::cross(radius2, data.normal).z, 2) * (1.f / r2->inertia));
+                relativeVelocity = r2->velocity + Math::cross(r2->rotVelocity, radius2) - r1->velocity - Math::cross(r1->rotVelocity, radius1);
+                velocityProj = Math::dot(relativeVelocity, data.normal);
+                scale = (-(1 + restitution) * velocityProj) / massLoss / rotationLoss / data.contactPoints.size();
+                sf::Vector2f impulse = data.normal * scale;
+
+                Interface::Renderer::drawPoint(contact);
+                Interface::Renderer::drawLine(contact, contact + impulse);
+
+                if(velocityProj > 0) continue;
+                if(!r1->mStatic){ r1->applyImpulse(-impulse, radius1); }
+                if(!r2->mStatic){ r2->applyImpulse(impulse, radius2); }
             }
         }
     }

@@ -17,9 +17,14 @@ void Game::start(){
 
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
-    planet = new Objects::Planet(engine, 0, 0, 4.f, "./res/textures/square.png");
-    player.create(engine, 600, 100);
-    ship = new Vehicles::Ship(engine, 900, 300);
+    planet = new Objects::Planet(engine, 0, 2048, 16.f, "./res/textures/planet.png");
+    player.create(engine, 100, -100);
+    ship = new Vehicles::Ship(engine, 0, -100);
+
+    Phys::RigidBody* r = Phys::RigidBody::createBoxRigidBody(-500, -100, 50, 50);
+    //r->velocity.x = 500.f;
+    r->mass = 10.f;
+    engine.registerBody(r);
 }
 
 void Game::event(){
@@ -57,8 +62,8 @@ void Game::frame(){
     // player.getRigidBody()->setRotation(plyRot);
     // player.getRigidBody()->force += planetToPlayer * -98.f * player.getRigidBody()->mass;
     
-    sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - planet->getCenter());
-    ship->getRigidBody()->force += planetToShip * -10.f * ship->getRigidBody()->mass;
+    // sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - planet->getCenter());
+    // ship->getRigidBody()->force += planetToShip * -150.f * ship->getRigidBody()->mass;
 
     if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
         sf::Vector2f pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));

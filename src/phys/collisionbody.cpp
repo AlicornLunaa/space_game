@@ -43,11 +43,21 @@ RigidBody::RigidBody(float x, float y, float rotation) : CollisionBody(x, y, rot
     rotVelocity = 0.f;
     torque = 0.f;
     mass = 1.f;
-    inertia = 10.f;
-    elasticity = 0.5f;
+    inertia = 0.000001f;
+    elasticity = 0.2f;
 }
 
 RigidBody::~RigidBody(){}
+
+// Functions
+void RigidBody::applyImpulse(sf::Vector2f impulse){
+    velocity += (1.f / mass) * impulse;
+}
+
+void RigidBody::applyImpulse(sf::Vector2f impulse, sf::Vector2f contactVec){
+    applyImpulse(impulse);
+    rotVelocity += (1.f / inertia) * Math::cross(contactVec, impulse).z;
+}
 
 // Static functions
 RigidBody* RigidBody::createBoxRigidBody(float x, float y, float w, float h, float rotation){

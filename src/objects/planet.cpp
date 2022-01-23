@@ -87,12 +87,19 @@ void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
         sf::Vector2f p1 = points[indices[i]];
         sf::Vector2f p2 = points[indices[i + 1]];
         sf::Vector2f p3 = points[indices[i + 2]];
+
+        // Get mesh data
+        sf::Vector2f midPoint = (p1 + p2 + p3) / 3.f;
+        p1 -= midPoint;
+        p2 -= midPoint;
+        p3 -= midPoint;
         
         // Add new collider for each triangle
-        Phys::Collider c;
-        c.addPoint(p1.x, p1.y);
-        c.addPoint(p2.x, p2.y);
-        c.addPoint(p3.x, p3.y);
+        Phys::Collider c(midPoint.x, midPoint.y, 0.f);
+        c.setScale(getSize());
+        c.addPoint(p1.x / getSize().x - 0.5f, p1.y / getSize().y - 0.5f);
+        c.addPoint(p2.x / getSize().x - 0.5f, p2.y / getSize().y - 0.5f);
+        c.addPoint(p3.x / getSize().x - 0.5f, p3.y / getSize().y - 0.5f);
         rigidbody->addCollider(c);
     }
 }
@@ -255,18 +262,20 @@ void Planet::create(Phys::Engine& engine, float x, float y, float scale, std::st
     setPosition(x, y);
     setScale(scale, scale);
     setSize((sf::Vector2f)planetData.getSize());
+    setOrigin(getSize() * 0.5f);
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());
     rigidbody->mStatic = true;
     rigidbody->mass = 10000000.f;
+    rigidbody->inertia = 1000000.f;
     calculateMesh();
     
     engine.registerBody(rigidbody);
 }
 
 sf::Vector2f Planet::getCenter(){
-    return getPosition() + getSize() * (getScale().x / 2);
+    return getPosition();
 }
 
 sf::Color Planet::getPixel(float x, float y){

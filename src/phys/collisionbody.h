@@ -6,6 +6,7 @@
 #pragma once
 #include <SFML/System.hpp>
 #include "colliders.h"
+#include "../util/vec_math.h"
 
 namespace Phys {
     
@@ -51,6 +52,10 @@ namespace Phys {
         RigidBody(float x, float y, float rotation);
         ~RigidBody();
 
+        // Functions
+        void applyImpulse(sf::Vector2f impulse);
+        void applyImpulse(sf::Vector2f impulse, sf::Vector2f contactVec);
+
         // Static functions
         static RigidBody* createBoxRigidBody(float x, float y, float w, float h, float rotation = 0.f);
     };
@@ -60,7 +65,7 @@ namespace Phys {
         CollisionBody* c2;
         sf::Vector2f normal;
         float displacement;
-        sf::Vector2f contactPoint;
+        std::vector<sf::Vector2f> contactPoints;
     };
 
 };

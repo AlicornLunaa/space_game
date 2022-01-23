@@ -61,5 +61,6 @@ namespace Math {
      * @return sf::Vector3f 
      */
     sf::Vector3f cross(sf::Vector2f v1, sf::Vector2f v2);
+    sf::Vector2f cross(float a, sf::Vector2f v);
 
 }
