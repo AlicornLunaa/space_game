@@ -244,17 +244,28 @@ Planet::~Planet(){}
 
 void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigned int radius){
     // Create a default planet with the given radius
-    planetData.create(radius * 2, radius * 2, sf::Color(0, 0, 0, 0));
+    planetData.create(radius * 2, radius * 2, sf::Color(67, 220, 67));
+
+    for(int mx = 0; mx < (int)radius * 2; mx++) for(int my = 0; my < (int)radius * 2; my++){
+        sf::Vector2f v(mx - (int)radius, my - (int)radius);
+        
+        if(v.x * v.x + v.y * v.y > (int)(radius * radius)){
+            planetData.setPixel(mx, my, sf::Color(0, 0, 0, 0));
+        }
+    }
+
     reloadTexture();
 
     setPosition(x, y);
     setScale(scale, scale);
-    setSize(sf::Vector2f(radius, radius) * 2.f);
+    setSize((sf::Vector2f)planetData.getSize());
+    setOrigin(getSize() * 0.5f);
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());
     rigidbody->mStatic = true;
     rigidbody->mass = 10000000.f;
+    rigidbody->inertia = 1000000.f;
     calculateMesh();
 
     engine.registerBody(rigidbody);
@@ -310,7 +321,7 @@ void Planet::setPixel(float x, float y, sf::Color color){
 
 void Planet::update(float deltaTime){
     // Update everything on the planet
-    calculateMesh();
+    //calculateMesh();
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 }

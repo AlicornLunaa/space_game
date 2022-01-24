@@ -17,7 +17,7 @@ void Game::start(){
 
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
-    planet = new Objects::Planet(engine, 0, 2048, 16.f, "./res/textures/planet.png");
+    planet = new Objects::Planet(engine, 0, 32 * 256 + 1000, 32.f, 256);
     player.create(engine, 100, -100);
     ship = new Vehicles::Ship(engine, 0, -100);
 
@@ -59,10 +59,10 @@ void Game::frame(){
     sf::Vector2f planetToPlayer = Math::normalize(player.getPosition() - planet->getCenter());
     float plyRot = std::atan2(planetToPlayer.y, planetToPlayer.x) * (180 / 3.1415) + 90;
     worldCamera.setRotation(plyRot);
-    player.getRigidBody()->force += planetToPlayer * -150.f * player.getRigidBody()->mass;
+    player.getRigidBody()->force += planetToPlayer * -450.f * player.getRigidBody()->mass;
     
     sf::Vector2f planetToShip = Math::normalize(ship->getPosition() - planet->getCenter());
-    ship->getRigidBody()->force += planetToShip * -150.f * ship->getRigidBody()->mass;
+    ship->getRigidBody()->force += planetToShip * -450.f * ship->getRigidBody()->mass;
 
     if(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)){
         sf::Vector2f pos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
