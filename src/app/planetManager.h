@@ -7,6 +7,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include "../objects/planet.h"
+#include "../objects/player.h"
 
 using namespace Objects;
 
@@ -18,8 +19,11 @@ namespace Managers {
         const float gravitationalConstant = 500.f;
         std::vector<Planet*> planetList;
 
+        sf::RectangleShape effectShape;
+
         // Functions
         sf::Vector2f gravityImpulse(Planet* p, Phys::RigidBody* rb);
+        Planet* findClosestPlanet(sf::Vector2f v);
 
     public:
         // Constructors
@@ -27,8 +31,11 @@ namespace Managers {
         ~PlanetManager();
 
         // Functions
+        void init(sf::RenderWindow& window);
         void registerPlanet(Planet* p);
+        void cleanupPlanets();
         void update(Phys::Engine& engine, float deltaTime);
+        void drawEffects(sf::RenderTarget& target, Player& ply);
         virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
     };
 

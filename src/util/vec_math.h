@@ -53,6 +53,7 @@ namespace Math {
      * @return float 
      */
     float distanceSquare(sf::Vector2f v1, sf::Vector2f v2);
+    float distance(sf::Vector2f v1, sf::Vector2f v2);
 
     /**
      * @brief Calculates the cross product

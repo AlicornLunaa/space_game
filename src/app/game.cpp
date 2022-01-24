@@ -14,15 +14,16 @@ void Game::start(){
     // Initialize static classes
     Interface::Renderer::init(&window);
     Debug::init(&window);
+    planetManager.init(window);
 
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
-    planetManager.registerPlanet(new Objects::Planet(engine, 0, 32 * 256 + 1000, 32.f, 256));
+    planetManager.registerPlanet(new Objects::Planet(engine, 0, 16 * 1024 + 1000, 16.f, 1024));
     player.create(engine, 100, -100);
     ship = new Vehicles::Ship(engine, 0, -100);
 
     Phys::RigidBody* r = Phys::RigidBody::createBoxRigidBody(-500, -100, 50, 50);
-    //r->velocity.x = 500.f;
+    r->velocity.x = 2500.f;
     r->mass = 10.f;
     engine.registerBody(r);
 }
@@ -59,6 +60,7 @@ void Game::frame(){
     // HUD rendering
     window.setView(hudCamera);
     window.draw(parallaxEffect);
+    planetManager.drawEffects(window, player);
 
     // World rendering
     worldCamera.setCenter(player.getPosition());
@@ -71,6 +73,7 @@ void Game::frame(){
 
 void Game::end(){
     // Cleanup
+    planetManager.cleanupPlanets();
     delete ship;
 }
 

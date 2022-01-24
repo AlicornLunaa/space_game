@@ -40,6 +40,10 @@ float Math::distanceSquare(sf::Vector2f v1, sf::Vector2f v2){
     return v.x * v.x + v.y * v.y;
 }
 
+float Math::distance(sf::Vector2f v1, sf::Vector2f v2){
+    return std::sqrt(distanceSquare(v1, v2));
+}
+
 sf::Vector3f Math::cross(sf::Vector2f v1, sf::Vector2f v2){
     return sf::Vector3f(0, 0, v1.x * v2.y - v1.y * v2.x);
 }
