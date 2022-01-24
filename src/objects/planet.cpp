@@ -2,9 +2,13 @@
 #include "../util/earcut.hpp"
 using namespace Objects;
 
+// Functions for when on planet
+
+
+// Functions for when in space
 void Planet::reloadTexture(){
-    tex.loadFromImage(planetData);
-    setTexture(&tex);
+    planetTexture.loadFromImage(planetData);
+    setTexture(&planetTexture);
 }
 
 void Planet::calculateMesh(){
@@ -63,15 +67,8 @@ void Planet::calculateMesh(){
             }
         }
     }
-    
-    // Draw shape
-    for(unsigned int i = 0; i < points.size(); i++){
-        sf::Vector2f p1 = points[i];
-        Interface::Renderer::drawPoint(p1 * getScale().x, 1.f, sf::Color::Yellow);
-    }
 
     cleanupMesh(points);
-    //convertMesh(points);
     convertToCollider(points);
 }
 
@@ -85,6 +82,7 @@ void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
     }
 
     // Remove original colliders
+    sf::Vector2f size = (sf::Vector2f)planetTexture.getSize();
     rigidbody->clearColliders();
 
     std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
@@ -101,77 +99,12 @@ void Planet::convertToCollider(std::vector<sf::Vector2f>& points){
         
         // Add new collider for each triangle
         Phys::Collider c(midPoint.x, midPoint.y, 0.f);
-        c.setScale(getSize());
-        c.addPoint(p1.x / getSize().x - 0.5f, p1.y / getSize().y - 0.5f);
-        c.addPoint(p2.x / getSize().x - 0.5f, p2.y / getSize().y - 0.5f);
-        c.addPoint(p3.x / getSize().x - 0.5f, p3.y / getSize().y - 0.5f);
+        c.setScale(size);
+        c.addPoint(p1.x / size.x - 0.5f, p1.y / size.y - 0.5f);
+        c.addPoint(p2.x / size.x - 0.5f, p2.y / size.y - 0.5f);
+        c.addPoint(p3.x / size.x - 0.5f, p3.y / size.y - 0.5f);
         rigidbody->addCollider(c);
     }
-}
-
-void Planet::convertMesh(std::vector<sf::Vector2f>& points){
-    // Run a jarvis march to get the hull
-    sf::Vector2f leftMost = points[0];
-    sf::Vector2f currentVertex = leftMost;
-    unsigned int startIndex = 2;
-    unsigned int index = 2;
-    int nextIndex = -1;
-    sf::Vector2f nextVertex = points[1];
-    std::vector<sf::Vector2f> hull = { currentVertex };
-    
-    // Find the leftmost point
-    for(unsigned int i = 1; i < points.size(); i++){
-        if(points[i].x < leftMost.x){
-            // Closer
-            leftMost = points[i];
-            currentVertex = leftMost;
-            startIndex = (i + 2) % points.size();
-            index = startIndex;
-            nextVertex = points[(i + 1) % points.size()];
-        }
-    }
-
-    // Start the march
-    while(true){
-        sf::Vector2f checking = points[index];
-        float crossProduct = Math::cross(nextVertex - currentVertex, checking - currentVertex).z;
-
-        if(crossProduct < 0){
-            nextVertex = checking;
-            nextIndex = index;
-        }
-        
-        index = (index + 1) % points.size();
-
-        if(index == startIndex){
-            if(nextVertex == leftMost){
-                break;
-            }
-
-            hull.push_back(nextVertex);
-            currentVertex = nextVertex;
-            index = startIndex;
-            points.erase(points.begin() + nextIndex);
-            nextVertex = leftMost;
-        }
-    }
-
-    // Draw hull
-    for(unsigned int i = 0; i < hull.size(); i++){
-        sf::Vector2f p1 = hull[i];
-        sf::Vector2f p2 = hull[(i + 1) % hull.size()];
-        Interface::Renderer::drawLine(p1 * getScale().x, p2 * getScale().x, sf::Color::Yellow);
-    }
-
-    points = hull;
-
-    // Create collision mesh
-    rigidbody->clearColliders();
-    Phys::Collider c;
-    for(sf::Vector2f p1 : points){
-        c.addPoint(p1.x, p1.y);
-    }
-    rigidbody->addCollider(c);
 }
 
 void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
@@ -228,15 +161,22 @@ void Planet::cleanupMesh(std::vector<sf::Vector2f>& points){
         }
     }
 
-    // Draw hull
-    for(unsigned int i = 0; i < hull.size(); i++){
-        sf::Vector2f p1 = hull[i];
-        Interface::Renderer::drawPoint(p1 * getScale().x, 2.f, sf::Color::Red);
-    }
-
     points = hull;
 }
 
+sf::Vector2f Planet::getCenter(){ return getPosition(); }
+
+sf::Color Planet::getAtmosColor(){ return atmosphereColor; }
+
+Phys::RigidBody* Planet::getRigidBody(){ return rigidbody; }
+
+void Planet::update(float deltaTime){
+    // Update everything on the planet
+    setPosition(rigidbody->getPosition());
+    setRotation(rigidbody->getRotation());
+}
+
+// Constructors
 Planet::Planet(Phys::Engine& engine, float x, float y, float scale, unsigned int radius){ create(engine, x, y, scale, radius); }
 Planet::Planet(Phys::Engine& engine, float x, float y, float scale, std::string path){ create(engine, x, y, scale, path); }
 Planet::Planet(){}
@@ -273,55 +213,7 @@ void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigne
 
 void Planet::create(Phys::Engine& engine, float x, float y, float scale, std::string path){
     // Create a planet from the given texture
+    create(engine, x, y, scale, 64.f);
     planetData.loadFromFile(path);
     reloadTexture();
-
-    setPosition(x, y);
-    setScale(scale, scale);
-    setSize((sf::Vector2f)planetData.getSize());
-    setOrigin(getSize() * 0.5f);
-
-    rigidbody = new Phys::RigidBody(x, y, 0.f);
-    rigidbody->setScale(getScale());
-    rigidbody->mStatic = true;
-    rigidbody->mass = 10000000.f;
-    rigidbody->inertia = 1000000.f;
-    calculateMesh();
-    
-    engine.registerBody(rigidbody);
-}
-
-sf::Vector2f Planet::getCenter(){
-    return getPosition();
-}
-
-sf::Color Planet::getPixel(float x, float y){
-    // Convert given position to image-local
-    sf::Vector2i pos = (sf::Vector2i)getInverseTransform().transformPoint(x, y);
-
-    // Bounds check it
-    if(pos.x < 0 || pos.x > getSize().x || pos.y < 0 || pos.y > getSize().y) return sf::Color(0, 0, 0, 0);
-
-    // Return the color
-    return planetData.getPixel(pos.x, pos.y);
-}
-
-void Planet::setPixel(float x, float y, sf::Color color){
-    // Convert given position to image-local
-    sf::Vector2i pos = (sf::Vector2i)getInverseTransform().transformPoint(x, y);
-
-    // Bounds check it
-    if(pos.x < 0 || pos.x > getSize().x || pos.y < 0 || pos.y > getSize().y) return;
-
-    // Select it
-    planetData.setPixel(pos.x, pos.y, color);
-    reloadTexture();
-    calculateMesh();
-}
-
-void Planet::update(float deltaTime){
-    // Update everything on the planet
-    //calculateMesh();
-    setPosition(rigidbody->getPosition());
-    setRotation(rigidbody->getRotation());
 }

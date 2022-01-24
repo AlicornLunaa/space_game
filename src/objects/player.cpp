@@ -16,7 +16,7 @@ void Player::create(Phys::Engine& engine, float x, float y){
     setOrigin(getSize() * 0.5f);
 
     rigidbody = Phys::RigidBody::createBoxRigidBody(x, y, 16, 32, 0.f);
-    rigidbody->mass = 10.f;
+    rigidbody->mass = 20.f;
     rigidbody->elasticity = 0.25f;
     engine.registerBody(rigidbody);
 
@@ -66,7 +66,7 @@ void Player::update(float deltaTime){
     setPosition(rigidbody->getPosition());
     setRotation(rigidbody->getRotation());
 
-    rigidbody->velocity *= 0.99f;
+    // rigidbody->velocity *= 0.99f;
 }
 
 // Rendering functions

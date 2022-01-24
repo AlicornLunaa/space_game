@@ -49,6 +49,12 @@ namespace Phys {
         bool unregisterBody(unsigned int id);
 
         /**
+         * @brief Returns the amount of colliders
+         * @return unsigned int 
+         */
+        unsigned int getBodyCount();
+
+        /**
          * @brief Get the Collider object
          * @param id 
          * @return Collider* 

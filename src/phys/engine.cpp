@@ -113,6 +113,8 @@ bool Engine::unregisterBody(unsigned int id){
     return true;
 }
 
+unsigned int Engine::getBodyCount(){ return bodies.size(); }
+
 CollisionBody* Engine::getBody(unsigned int id){
     return bodies[id];
 }

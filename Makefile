@@ -30,7 +30,7 @@ dirs:
 	mkdir -p $(OBJDIR)
 
 # Builds the app
-$(APPNAME): obj/main.o obj/engine.o obj/collisionbody.o obj/colliders.o obj/vehicle.o obj/planet.o obj/player.o obj/parallax.o obj/debugger.o obj/vec_math.o obj/panel.o obj/renderer.o obj/game.o
+$(APPNAME): obj/main.o obj/engine.o obj/collisionbody.o obj/colliders.o obj/vehicle.o obj/planetmanager.o obj/planet.o obj/player.o obj/parallax.o obj/debugger.o obj/vec_math.o obj/panel.o obj/renderer.o obj/game.o
 	$(CC) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Builds every object
@@ -68,6 +68,9 @@ obj/panel.o: src/interface/panel.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 
 obj/renderer.o: src/interface/renderer.cpp
+	$(CC) $(CXXFLAGS) -o $@ -c $^
+
+obj/planetmanager.o: src/app/planetManager.cpp
 	$(CC) $(CXXFLAGS) -o $@ -c $^
 
 obj/game.o: src/app/game.cpp

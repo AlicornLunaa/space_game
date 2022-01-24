@@ -5,6 +5,7 @@
  */
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "planetManager.h"
 #include "../interface/ui.h"
 #include "../phys/physics.h"
 #include "../objects/objects.h"
@@ -24,8 +25,8 @@ private:
     float deltaTime;
 
     // Game variables
+    Managers::PlanetManager planetManager;
     Objects::Parallax parallaxEffect;
-    Objects::Planet* planet;
     Objects::Player player;
     Vehicles::Ship* ship;
 
