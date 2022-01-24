@@ -20,7 +20,15 @@ Planet* PlanetManager::findClosestPlanet(sf::Vector2f v){
         }
     }
 
-    return planetList[closest];
+    return (planetList.size() == 0) ? NULL : planetList[closest];
+}
+
+float PlanetManager::getAtmosDepth(Planet* p, sf::Vector2f v){
+    // Get a scale for the depth of the atmosphere
+    float radius = p->getSize().x / 2.f * p->getScale().x;
+    float distanceToSurface = Math::distance(v, p->getRigidBody()->getPosition());
+    distanceToSurface = distanceToSurface - radius;
+    return (1.f - std::min(std::max(distanceToSurface / radius * 2.f, 0.04f), 1.f));
 }
 
 void PlanetManager::init(sf::RenderWindow& window){
@@ -57,6 +65,7 @@ void PlanetManager::update(Phys::Engine& engine, float deltaTime){
         // Variables needed
         Phys::RigidBody* rb = engine.getRigidBody(i);
         sf::Vector2f impulse;
+        float totalDrag = 0.f;
 
         // Make sure body is actually rigid
         if(rb == NULL) continue;
@@ -70,29 +79,33 @@ void PlanetManager::update(Phys::Engine& engine, float deltaTime){
             }
 
             // Calculate impulse for this planet
-            impulse += gravityImpulse(p, rb);
+            impulse += gravityImpulse(p, rb);;
+
+            // Calculate drag impulse
+            totalDrag += getAtmosDepth(p, rb->getPosition());
         }
 
-        // Add impulse
+        // Add impulses
         rb->applyImpulse(impulse * deltaTime);
+        rb->velocity *= 1.f - std::max(std::min(totalDrag * 0.02f, 1.f), 0.f);
     }
 }
 
 void PlanetManager::drawEffects(sf::RenderTarget& target, Player& ply){
     // Draw the HUD effects concerning planets
+    // Error checking
+    if(planetList.size() == 0) return;
+
     /**
      * Drawing the atmosphere by getting the closest planet to the player
      * finding the distance to the surface and adjusting an effect strength
      */
     sf::Vector2f plyPos = ply.getRigidBody()->getPosition();
     Planet* closestPlanet = findClosestPlanet(plyPos);
-    float radius = closestPlanet->getSize().x / 2.f * closestPlanet->getScale().x;
-    float distanceToSurface = Math::distance(plyPos, closestPlanet->getRigidBody()->getPosition());
-    distanceToSurface = distanceToSurface - radius;
+    float atmosDepth = getAtmosDepth(closestPlanet, plyPos);
 
-    float colorScale = 1.f - std::min(std::max(distanceToSurface / radius * 2.f, 0.04f), 1.f);
     sf::Color renderColor = closestPlanet->getAtmosColor();
-    renderColor.a = 255.f * colorScale;
+    renderColor.a = 255.f * atmosDepth;
     effectShape.setFillColor(renderColor);
 
     target.draw(effectShape);

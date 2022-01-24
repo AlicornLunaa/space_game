@@ -22,6 +22,8 @@ namespace Objects {
         sf::Texture planetTexture;
         sf::Color atmosphereColor; // Color of the atmospheric effect
         Phys::RigidBody* rigidbody;
+        
+        float atmosDensity;
 
         /** @brief Updates SFML texture based on the image data */
         void reloadTexture();

@@ -19,8 +19,8 @@ void Game::start(){
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
     planetManager.registerPlanet(new Objects::Planet(engine, 0, 16 * 1024 + 1000, 16.f, 1024));
-    player.create(engine, 100, -100);
-    ship = new Vehicles::Ship(engine, 0, -100);
+    player.create(engine, 100, -400);
+    ship = new Vehicles::Ship(engine, 0, -400);
 
     Phys::RigidBody* r = Phys::RigidBody::createBoxRigidBody(-500, -100, 50, 50);
     r->velocity.x = 2500.f;

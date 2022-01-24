@@ -40,8 +40,8 @@ Ship::~Ship(){}
 
 void Ship::updateKeys(float deltaTime){
     // Controls
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 800.f * rigidbody->mass; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 4400.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -4400.f * rigidbody->mass; }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->torque += -250.f * rigidbody->mass; }
     if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->torque += 250.f * rigidbody->mass; }
 }

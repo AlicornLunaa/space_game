@@ -201,7 +201,8 @@ void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigne
     setSize((sf::Vector2f)planetData.getSize());
     setOrigin(getSize() * 0.5f);
 
-    atmosphereColor = sf::Color(135 * 0.9f, 206 * 0.9f, 235 * 0.9f);
+    atmosDensity = 0.9f;
+    atmosphereColor = sf::Color(135 * atmosDensity, 206 * atmosDensity, 235 * atmosDensity);
 
     rigidbody = new Phys::RigidBody(x, y, 0.f);
     rigidbody->setScale(getScale());

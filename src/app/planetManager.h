@@ -24,6 +24,7 @@ namespace Managers {
         // Functions
         sf::Vector2f gravityImpulse(Planet* p, Phys::RigidBody* rb);
         Planet* findClosestPlanet(sf::Vector2f v);
+        float getAtmosDepth(Planet* p, sf::Vector2f v);
 
     public:
         // Constructors
