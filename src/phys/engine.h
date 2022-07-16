@@ -6,6 +6,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <SFML/Graphics.hpp>
 #include "colliders.h"
 #include "collisionbody.h"

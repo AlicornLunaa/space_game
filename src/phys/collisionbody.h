@@ -67,7 +67,7 @@ namespace Phys {
         CollisionBody* c2;
         sf::Vector2f normal;
         float displacement;
-        std::vector<sf::Vector2f> contactPoints;
+        sf::Vector2f contactPoint;
     };
 
 };

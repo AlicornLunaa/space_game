@@ -29,14 +29,33 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         // Get colliders
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
-        
-        // Loop through every edge
+        std::stack<sf::Vector2f> possibleAxises;
+        sf::Vector2f center1 = b1->getTransform().transformPoint(c1.getPosition());
+        sf::Vector2f center2 = b2->getTransform().transformPoint(c2.getPosition());
+        sf::Vector2f direction = (center2 - center1);
+        sf::Vector2f normal;
+        float penetration = INFINITY;
+
+        // Get every possible edge to check
         for(unsigned int i = 0; i < c1.getPointCount(); i++){
-            // Get the edge of the face
             sf::Vector2f p1 = b1->getPointOnCollider(id1, i);
             sf::Vector2f p2 = b1->getPointOnCollider(id1, (i + 1) % c1.getPointCount());
-            sf::Vector2f center = b1->getTransform().transformPoint(c1.getPosition());
-            sf::Vector2f normal = Math::perpendicular(Math::normalize(p2 - p1));
+            sf::Vector2f perp = Math::perpendicular(p2 - p1);
+            possibleAxises.push(perp);
+        }
+        
+        for(unsigned int i = 0; i < c2.getPointCount(); i++){
+            sf::Vector2f p1 = b2->getPointOnCollider(id2, i);
+            sf::Vector2f p2 = b2->getPointOnCollider(id2, (i + 1) % c1.getPointCount());
+            sf::Vector2f perp = Math::perpendicular(p2 - p1);
+            possibleAxises.push(perp);
+        }
+
+        // Try every perpendicular edge
+        while(possibleAxises.size() > 0){
+            // Project every vertex from the shapes onto the lines
+            sf::Vector2f edge = possibleAxises.top();
+            possibleAxises.pop();
 
             // Edge data
             float min1 = INFINITY;
@@ -44,46 +63,52 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             float min2 = INFINITY;
             float max2 = -INFINITY;
 
-            // Run SAT calculate on edge
+            // Body 1
             for(unsigned int j = 0; j < c1.getPointCount(); j++){
-                // Project point
-                float proj = Math::dot(b1->getPointOnCollider(id1, j), normal);
+                float proj = Math::dot(b1->getPointOnCollider(id1, j), edge);
                 min1 = std::min(proj, min1);
                 max1 = std::max(proj, max1);
             }
-            
+
+            // Body 2
             for(unsigned int j = 0; j < c2.getPointCount(); j++){
-                // Project point
-                float proj = Math::dot(b2->getPointOnCollider(id2, j), normal);
+                float proj = Math::dot(b2->getPointOnCollider(id2, j), edge);
                 min2 = std::min(proj, min2);
                 max2 = std::max(proj, max2);
             }
 
-            // Run through every diagonal-edge intersection
-            for(unsigned int j = 0; j < c2.getPointCount(); j++){
-                sf::Vector2f s = b2->getPointOnCollider(id2, j);
-                sf::Vector2f e = b2->getPointOnCollider(id2, (j + 1) % c2.getPointCount());
+            // Final calculation
+            if(!((min1 < max2 && min1 > min2) || (min2 < max1 && min2 > min1))){
+                return false;
+            }
 
-                float h = (e.x - s.x) * (center.y - p1.y) - (center.x - p1.x) * (e.y - s.y);
-                float t1 = ((s.y - e.y) * (center.x - s.x) + (e.x - s.x) * (center.y - s.y)) / h;
-                float t2 = ((center.y - p1.y) * (p1.x - s.x) + (p1.x - center.x) * (center.y - s.y)) / h;
-
-                if(t1 >= 0.f && t1 < 1.f && t2 >= 0.f && t2 < 1.f){
-                    // Intersection found, record the point
-                    data.contactPoints.push_back(b1->getPointOnCollider(id1, i));
+            float edgePenetration = std::min(max2 - min1, max1 - min2);
+            if(edgePenetration < penetration){
+                penetration = edgePenetration;
+                normal = edge;
+                
+                // Gets the contact point, save it here so I dont need another variable
+                // Data is redefined when normal gets normalized at the end
+                if(min1 <= min2 && max1 >= min2){
+                    data.contactPoint = Math::normalize(edge) * min1;
+                }
+                
+                if(min2 <= min1 && max2 >= min1){
+                    data.contactPoint = Math::normalize(edge) * max1;
                 }
             }
-
-            // Get overlap data to respond
-            float currentOverlap = std::max(max2, min2) - std::min(max1, min1);
-            if(currentOverlap < data.displacement){
-                data.normal = normal * scalar;
-                data.displacement = currentOverlap;
-            }
-
-            // Check collision
-            if(!(max2 >= min1 && max1 >= min2)) return false;
         }
+
+        penetration /= Math::magnitude(normal);
+        normal = Math::normalize(normal);
+
+        if(Math::dot(direction, normal) < 0.f){
+            normal *= -1.f;
+        }
+
+        data.normal = normal;
+        data.displacement = penetration;
+        data.contactPoint += normal * penetration;
 
         return true;
     };
@@ -92,10 +117,13 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
     if(body1->getCollidersSize() == 0 || body2->getCollidersSize() == 0) return false;
 
     // Commence check
-    bool collided = check(body1, body2, id1, id2, data, -1) && check(body2, body1, id2, id1, data, 1);
+    bool collided = check(body1, body2, id1, id2, data, -1);
     
     if(collided){
         collisions.push_back(data);
+
+        Interface::Renderer::drawPoint(data.contactPoint, 10.f, sf::Color::Red);
+        Interface::Renderer::drawLine(data.contactPoint, data.contactPoint + data.normal * -data.displacement, sf::Color::Yellow);
     }
 
     return collided;
@@ -181,10 +209,10 @@ void Engine::collisionResolution(float deltaTime){
             if(!r2->mStatic){ r2->applyImpulse(impulse); }
 
             // Contact based impulses
-            for(unsigned int i = 0; i < data.contactPoints.size(); i++){
+            for(unsigned int i = 0; i < 1/*data.contactPoints.size()*/; i++){
                 // Rotational impulse
                 // Get radius for the point being hit
-                sf::Vector2f contact = data.contactPoints[i];
+                sf::Vector2f contact = data.contactPoint;
                 sf::Vector2f radius1 = contact - r1->getCenter();
                 sf::Vector2f radius2 = contact - r2->getCenter();
 
@@ -192,7 +220,7 @@ void Engine::collisionResolution(float deltaTime){
                 float rotationLoss = (std::pow(Math::cross(radius1, data.normal).z, 2) * (1.f / r1->inertia) + std::pow(Math::cross(radius2, data.normal).z, 2) * (1.f / r2->inertia));
                 sf::Vector2f rv = relativeVelocity + Math::cross(r2->rotVelocity * (3.1415f / 180), radius2) - Math::cross(r1->rotVelocity * (3.1415f / 180), radius1);
                 velocityProj = Math::dot(rv, data.normal);
-                scale = (-(1 + restitution) * velocityProj) / (massLoss + rotationLoss) / data.contactPoints.size();
+                scale = (-(1 + restitution) * velocityProj) / (massLoss + rotationLoss) / 1/*data.contactPoints.size()*/;
                 sf::Vector2f impulse = data.normal * scale;
 
                 Interface::Renderer::drawPoint(contact);
@@ -241,7 +269,7 @@ void Engine::physicsUpdate(float deltaTime){
 
 void Engine::update(float deltaTime){
     collisionDetection();
-    collisionResolution(deltaTime);
+    // collisionResolution(deltaTime);
     physicsUpdate(deltaTime);
 }
 
