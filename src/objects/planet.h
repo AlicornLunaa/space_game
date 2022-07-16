@@ -9,6 +9,12 @@
 #include <SFML/Graphics.hpp>
 #include "../interface/renderer.h"
 #include "../phys/physics.h"
+#include "player.h"
+
+/**
+ * ! Create a 'curved space' for the transition time
+ * ! Theory for this is to render a rectangle but move the farther verticies away
+ */
 
 namespace Objects {
 
@@ -16,10 +22,10 @@ namespace Objects {
     private:
         // Members when on planet
 
-
         // Members when in space
         sf::Image planetData; // Run an algorithm to convert the blocks in the world to a texture
         sf::Texture planetTexture;
+        sf::Texture groundTexture;
         sf::Color atmosphereColor; // Color of the atmospheric effect
         Phys::RigidBody* rigidbody;
         
@@ -51,7 +57,7 @@ namespace Objects {
         void create(Phys::Engine& engine, float x, float y, float scale, std::string path);
 
         // Members when on planet
-        
+        void drawGround(sf::RenderTarget& target, Player& ply);
 
         // Members when in space
         sf::Vector2f getCenter();

@@ -18,8 +18,8 @@ void Game::start(){
 
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
-    planetManager.registerPlanet(new Objects::Planet(engine, 0, 16 * 1024 + 1000, 16.f, 1024));
-    player.create(engine, 100, -400);
+    planetManager.registerPlanet(new Objects::Planet(engine, 0, 2 * 1024 + 100, 2.f, 1024));
+    player.create(engine, 100, -1024);
     ship = new Vehicles::Ship(engine, 0, -400);
 
     Phys::RigidBody* r = Phys::RigidBody::createBoxRigidBody(-500, -100, 50, 50);
@@ -51,7 +51,7 @@ void Game::event(){
 
 void Game::frame(){
     // Physics
-    engine.update(deltaTime);
+    // engine.update(deltaTime);
     planetManager.update(engine, deltaTime);
     player.update(deltaTime);
     ship->update(deltaTime);
@@ -69,6 +69,7 @@ void Game::frame(){
     window.draw(player);
     window.draw(*ship);
     window.draw(engine);
+    engine.update(deltaTime);
 }
 
 void Game::end(){

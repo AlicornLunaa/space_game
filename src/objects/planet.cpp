@@ -3,7 +3,42 @@
 using namespace Objects;
 
 // Functions for when on planet
+void Planet::drawGround(sf::RenderTarget& target, Player& ply){
+    float radius = 4096.f;
+    int subdivisions = 32;
+    sf::Vector2f parent = getPosition();
+    sf::VertexArray obj(sf::TriangleFan, subdivisions + 2);
 
+    sf::Vector2f relative = Math::normalize(ply.getPosition() - getPosition());
+    float plyDistance = std::min(std::max((Math::distance(getPosition(), ply.getPosition()) - radius) / radius * 3.1415f, -0.5f), 0.f);
+    
+    obj[0].position = sf::Vector2f(0.f, 0.f) + parent;
+    obj[0].texCoords = sf::Vector2f(512, 1024);
+
+    int vertex = 1;
+    for(int i = 0; i < 360; i += 360 / subdivisions){
+        // Get new coordinates
+        float radians1 = i * (3.1415f / 180.f);
+        float radians2 = i * (3.1415f / 180.f);
+
+        float x = parent.x + radius * std::cos(radians1);
+        float y = parent.y + radius * std::sin(radians1);
+        float tx = 1024 * std::cos(radians2);
+        float ty = 0 * std::sin(radians2);
+
+        obj[vertex].position.x = x * std::cos((plyDistance) * 3.1415) + std::abs(radius) * std::sin(plyDistance * 3.1415);
+        obj[vertex].position.y = y * std::cos((plyDistance) * 3.1415);
+        obj[vertex].texCoords.x = tx;
+        obj[vertex].texCoords.y = ty;
+        vertex++;
+    }
+
+    obj[subdivisions + 1].position = obj[1].position;
+    obj[subdivisions + 1].texCoords = obj[1].texCoords;
+
+    target.draw(obj, &groundTexture);
+    Interface::Renderer::drawLine(getPosition(), getPosition() + relative * 500.f, sf::Color::Red);
+}
 
 // Functions for when in space
 void Planet::reloadTexture(){
@@ -195,6 +230,8 @@ void Planet::create(Phys::Engine& engine, float x, float y, float scale, unsigne
     }
 
     reloadTexture();
+
+    groundTexture.loadFromFile("./res/textures/ground.png");
 
     setPosition(x, y);
     setScale(scale, scale);

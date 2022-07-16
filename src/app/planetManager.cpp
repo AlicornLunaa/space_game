@@ -51,7 +51,8 @@ sf::Vector2f PlanetManager::gravityImpulse(Planet* p, Phys::RigidBody* rb){
     float radius = Math::distanceSquare(rb->getPosition(), pr->getPosition());
     float force = gravitationalConstant * ((pr->mass * rb->mass) / radius);
 
-    return dir * force * rb->mass;
+    //! return dir * force * rb->mass * 0.01f;
+    return sf::Vector2f(0, 0);
 }
 
 void PlanetManager::update(Phys::Engine& engine, float deltaTime){
@@ -109,6 +110,8 @@ void PlanetManager::drawEffects(sf::RenderTarget& target, Player& ply){
     effectShape.setFillColor(renderColor);
 
     target.draw(effectShape);
+
+    // closestPlanet->drawGround(target, ply);
 }
 
 void PlanetManager::draw(sf::RenderTarget& target, sf::RenderStates states) const {
