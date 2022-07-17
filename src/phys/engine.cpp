@@ -24,8 +24,13 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
     // Store collision
     CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY };
 
-    // Define function
+    // Define functions
+    auto distanceToLine = [](sf::Vector2f a, sf::Vector2f b, sf::Vector2f p){
+        return std::abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / std::sqrt(std::pow(b.x - a.x, 2) + std::pow(b.y - a.y, 2));
+    };
+
     auto check = [](CollisionBody* b1, CollisionBody* b2, int id1, int id2, CollisionData& data, float scalar){
+        //! Calculate point by projecting dot onto edge
         // Get colliders
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
@@ -46,7 +51,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         
         for(unsigned int i = 0; i < c2.getPointCount(); i++){
             sf::Vector2f p1 = b2->getPointOnCollider(id2, i);
-            sf::Vector2f p2 = b2->getPointOnCollider(id2, (i + 1) % c1.getPointCount());
+            sf::Vector2f p2 = b2->getPointOnCollider(id2, (i + 1) % c2.getPointCount());
             sf::Vector2f perp = Math::perpendicular(p2 - p1);
             possibleAxises.push(perp);
         }
@@ -86,16 +91,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             if(edgePenetration < penetration){
                 penetration = edgePenetration;
                 normal = edge;
-                
-                // Gets the contact point, save it here so I dont need another variable
-                // Data is redefined when normal gets normalized at the end
-                if(min1 <= min2 && max1 >= min2){
-                    data.contactPoint = Math::normalize(edge) * min1;
-                }
-                
-                if(min2 <= min1 && max2 >= min1){
-                    data.contactPoint = Math::normalize(edge) * max1;
-                }
+                data.contactPoint = b1->getTransform().transformPoint(c1.getPosition());
             }
         }
 
@@ -106,9 +102,11 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             normal *= -1.f;
         }
 
+        Interface::Renderer::drawLine(b1->getCenter(), b1->getCenter() + normal * -penetration);
+        Interface::Renderer::drawPoint(data.contactPoint);
+
         data.normal = normal;
         data.displacement = penetration;
-        data.contactPoint += normal * penetration;
 
         return true;
     };
@@ -122,7 +120,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
     if(collided){
         collisions.push_back(data);
 
-        Interface::Renderer::drawPoint(data.contactPoint, 10.f, sf::Color::Red);
+        // Interface::Renderer::drawPoint(data.contactPoint, 10.f, sf::Color::Red);
         Interface::Renderer::drawLine(data.contactPoint, data.contactPoint + data.normal * -data.displacement, sf::Color::Yellow);
     }
 
