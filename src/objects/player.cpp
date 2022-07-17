@@ -27,10 +27,17 @@ void Player::create(Phys::Engine& engine, float x, float y){
 // Private functions
 void Player::updateKeys(float deltaTime){
     // Controls
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->force += rigidbody->getRight() * -800.f * rigidbody->mass; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->force += rigidbody->getRight() * 800.f * rigidbody->mass; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 1400.f * rigidbody->mass; }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -1400.f * rigidbody->mass; }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->force += rigidbody->getRight() * -800.f * rigidbody->mass; }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->force += rigidbody->getRight() * 800.f * rigidbody->mass; }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 1400.f * rigidbody->mass; }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -1400.f * rigidbody->mass; }
+    
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->move(sf::Vector2f(-1.f, 0)); }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->move(sf::Vector2f(1.f, 0)); }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->move(sf::Vector2f(0, -1.f)); }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->move(sf::Vector2f(0, 1.f)); }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ rigidbody->rotate(-1.f); }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ rigidbody->rotate(1.f); }
 }
 
 // Vehicle functions

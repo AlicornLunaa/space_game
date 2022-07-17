@@ -35,6 +35,8 @@ namespace Phys {
         sf::Vector2f getCenter();
         sf::Vector2f getUp();
         sf::Vector2f getRight();
+        
+        bool contains(sf::Vector2f point);
     };
 
     class RigidBody : public CollisionBody {

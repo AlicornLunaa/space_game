@@ -72,5 +72,4 @@ namespace Math {
      * @return bool
      */
     bool clipPoint(sf::Vector2f edgeStart, sf::Vector2f edgeEnd, sf::Vector2f point, bool flip);
-
 }

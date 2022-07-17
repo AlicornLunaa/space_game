@@ -26,17 +26,15 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
 
     // Define functions
     auto check = [](CollisionBody* b1, CollisionBody* b2, int id1, int id2, CollisionData& data, float scalar){
-        //! Calculate point by projecting dot onto edge
         // Get colliders
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
-        std::stack<std::array<sf::Vector2f, 3>> possibleAxises;
+        std::stack<sf::Vector2f> possibleAxises;
         sf::Vector2f center1 = b1->getTransform().transformPoint(c1.getPosition());
         sf::Vector2f center2 = b2->getTransform().transformPoint(c2.getPosition());
         sf::Vector2f direction = (center2 - center1);
         sf::Vector2f normal;
-        std::pair<sf::Vector2f, sf::Vector2f> edgeLine;
-        sf::Vector2f contact;
+        std::vector<sf::Vector2f> contacts;
         float penetration = INFINITY;
 
         // Get every possible edge to check
@@ -44,21 +42,20 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             sf::Vector2f p1 = b1->getPointOnCollider(id1, i);
             sf::Vector2f p2 = b1->getPointOnCollider(id1, (i + 1) % c1.getPointCount());
             sf::Vector2f perp = Math::perpendicular(p2 - p1);
-            possibleAxises.push({ perp, p1, p2 });
+            possibleAxises.push(perp);
         }
         
         for(unsigned int i = 0; i < c2.getPointCount(); i++){
             sf::Vector2f p1 = b2->getPointOnCollider(id2, i);
             sf::Vector2f p2 = b2->getPointOnCollider(id2, (i + 1) % c2.getPointCount());
             sf::Vector2f perp = Math::perpendicular(p2 - p1);
-            possibleAxises.push({ perp, p1, p2 });
+            possibleAxises.push(perp);
         }
 
         // Try every perpendicular edge
         while(possibleAxises.size() > 0){
             // Project every vertex from the shapes onto the lines
-            std::array<sf::Vector2f, 3> data = possibleAxises.top();
-            sf::Vector2f edge = data[0];
+            sf::Vector2f edge = possibleAxises.top();
             possibleAxises.pop();
 
             // Edge data
@@ -114,16 +111,6 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             if(edgePenetration < penetration){
                 penetration = edgePenetration;
                 normal = edge;
-                edgeLine.first = data[1];
-                edgeLine.second = data[2];
-
-                if(a < d && a > c){
-                    contact = min1;
-                }
-                
-                if(b < d && b > c){
-                    contact = max1;
-                }
             }
         }
 
@@ -134,16 +121,29 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             normal *= -1.f;
         }
 
+        for(unsigned int i = 0; i < c1.getPointCount(); i++){
+            sf::Vector2f p = b1->getPointOnCollider(id1, i);
+            
+            if(b2->contains(p)){
+                contacts.push_back(p);
+            }
+        }
+
+        for(unsigned int i = 0; i < c2.getPointCount(); i++){
+            sf::Vector2f p = b2->getPointOnCollider(id2, i);
+            
+            if(b1->contains(p)){
+                contacts.push_back(p);
+            }
+        }
+
+        for(sf::Vector2f p : contacts){
+            data.contactPoint += p;
+        }
+
         data.normal = normal;
         data.displacement = penetration;
-        data.contactPoint = contact - normal * penetration;
-
-        for(unsigned int i = 0; i < c1.getPointCount(); i++){
-            //! Clip every plane
-            sf::Vector2f p = b1->getPointOnCollider(id1, i);
-            Interface::Renderer::drawPoint(p, 2.f, Math::clipPoint(edgeLine.first, edgeLine.second, p, true) ? sf::Color::Green : sf::Color::Red);
-            Interface::Renderer::drawLine(edgeLine.first, edgeLine.second, sf::Color::Magenta);
-        }
+        data.contactPoint /= (float)contacts.size();
 
         Interface::Renderer::drawLine(b1->getCenter(), b1->getCenter() + normal * -penetration);
         Interface::Renderer::drawPoint(data.contactPoint);
