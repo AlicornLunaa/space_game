@@ -51,8 +51,7 @@ sf::Vector2f PlanetManager::gravityImpulse(Planet* p, Phys::RigidBody* rb){
     float radius = Math::distanceSquare(rb->getPosition(), pr->getPosition());
     float force = gravitationalConstant * ((pr->mass * rb->mass) / radius);
 
-    //! return dir * force * rb->mass * 0.01f;
-    return sf::Vector2f(0, 0);
+    return dir * force * rb->mass * 0.01f;
 }
 
 void PlanetManager::update(Phys::Engine& engine, float deltaTime){

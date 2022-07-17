@@ -39,6 +39,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         sf::Vector2f center2 = b2->getTransform().transformPoint(c2.getPosition());
         sf::Vector2f direction = (center2 - center1);
         sf::Vector2f normal;
+        sf::Vector2f contact;
         float penetration = INFINITY;
 
         // Get every possible edge to check
@@ -63,35 +64,66 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             possibleAxises.pop();
 
             // Edge data
-            float min1 = INFINITY;
-            float max1 = -INFINITY;
-            float min2 = INFINITY;
-            float max2 = -INFINITY;
+            sf::Vector2f min1;
+            sf::Vector2f max1;
+            sf::Vector2f min2;
+            sf::Vector2f max2;
+            float a = INFINITY;
+            float b = -INFINITY;
+            float c = INFINITY;
+            float d = -INFINITY;
 
             // Body 1
             for(unsigned int j = 0; j < c1.getPointCount(); j++){
-                float proj = Math::dot(b1->getPointOnCollider(id1, j), edge);
-                min1 = std::min(proj, min1);
-                max1 = std::max(proj, max1);
+                sf::Vector2f p = b1->getPointOnCollider(id1, j);
+                float proj = Math::dot(p, edge);
+
+                // Get min and maxs
+                if(proj < a){
+                    min1 = p;
+                    a = proj;
+                }
+                
+                if(proj > b){
+                    max1 = p;
+                    b = proj;
+                }
             }
 
             // Body 2
             for(unsigned int j = 0; j < c2.getPointCount(); j++){
-                float proj = Math::dot(b2->getPointOnCollider(id2, j), edge);
-                min2 = std::min(proj, min2);
-                max2 = std::max(proj, max2);
+                sf::Vector2f p = b2->getPointOnCollider(id2, j);
+                float proj = Math::dot(p, edge);
+
+                // Get min and maxs
+                if(proj < c){
+                    min2 = p;
+                    c = proj;
+                }
+                
+                if(proj > d){
+                    max2 = p;
+                    d = proj;
+                }
             }
 
             // Final calculation
-            if(!((min1 < max2 && min1 > min2) || (min2 < max1 && min2 > min1))){
+            if(!((a < d && a > c) || (c < b && c > a))){
                 return false;
             }
 
-            float edgePenetration = std::min(max2 - min1, max1 - min2);
+            float edgePenetration = std::min(d - a, b - c);
             if(edgePenetration < penetration){
                 penetration = edgePenetration;
                 normal = edge;
-                data.contactPoint = b1->getTransform().transformPoint(c1.getPosition());
+
+                if(a < d && a > c){
+                    contact = min1;
+                }
+                
+                if(b < d && b > c){
+                    contact = max1;
+                }
             }
         }
 
@@ -102,11 +134,12 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             normal *= -1.f;
         }
 
-        Interface::Renderer::drawLine(b1->getCenter(), b1->getCenter() + normal * -penetration);
-        Interface::Renderer::drawPoint(data.contactPoint);
-
         data.normal = normal;
         data.displacement = penetration;
+        data.contactPoint = contact - normal * penetration;
+
+        Interface::Renderer::drawLine(b1->getCenter(), b1->getCenter() + normal * -penetration);
+        Interface::Renderer::drawPoint(data.contactPoint);
 
         return true;
     };
@@ -120,7 +153,6 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
     if(collided){
         collisions.push_back(data);
 
-        // Interface::Renderer::drawPoint(data.contactPoint, 10.f, sf::Color::Red);
         Interface::Renderer::drawLine(data.contactPoint, data.contactPoint + data.normal * -data.displacement, sf::Color::Yellow);
     }
 
@@ -267,7 +299,7 @@ void Engine::physicsUpdate(float deltaTime){
 
 void Engine::update(float deltaTime){
     collisionDetection();
-    // collisionResolution(deltaTime);
+    collisionResolution(deltaTime);
     physicsUpdate(deltaTime);
 }
 
