@@ -18,7 +18,7 @@ void Game::start(){
 
     // Initialize game variables
     parallaxEffect.create(window.getSize().x, window.getSize().y, 64.f);
-    planetManager.registerPlanet(new Objects::Planet(engine, 0, 2 * 1024 + 100, 2.f, 1024));
+    // planetManager.registerPlanet(new Objects::Planet(engine, 0, 2 * 1024 + 100, 2.f, 1024));
     player.create(engine, 100, -1024);
     ship = new Vehicles::Ship(engine, 0, -1024);
 

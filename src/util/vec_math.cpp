@@ -51,3 +51,10 @@ sf::Vector3f Math::cross(sf::Vector2f v1, sf::Vector2f v2){
 sf::Vector2f Math::cross(float a, sf::Vector2f v){
     return { -a * v.y, a * v.x };
 }
+
+bool Math::clipPoint(sf::Vector2f edgeStart, sf::Vector2f edgeEnd, sf::Vector2f point, bool flip){
+    // Clips a point along an edge
+    float slope = (edgeEnd.y - edgeStart.y) / (edgeEnd.x - edgeStart.x);
+    float product = (slope * (point.x - edgeStart.x)) + edgeStart.y;
+    return (flip ? (product - point.y) <= 0 : (product - point.y) >= 0);
+}

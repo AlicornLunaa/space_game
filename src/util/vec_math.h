@@ -63,5 +63,14 @@ namespace Math {
      */
     sf::Vector3f cross(sf::Vector2f v1, sf::Vector2f v2);
     sf::Vector2f cross(float a, sf::Vector2f v);
+    
+    /**
+     * @brief Returns true or false depending on if the point is behind the line
+     * @param edge The slope
+     * @param point Point to test
+     * @param flip Reverse slope
+     * @return bool
+     */
+    bool clipPoint(sf::Vector2f edgeStart, sf::Vector2f edgeEnd, sf::Vector2f point, bool flip);
 
 }
