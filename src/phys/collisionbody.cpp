@@ -35,7 +35,16 @@ sf::Vector2f CollisionBody::getUp(){ return sf::Vector2f(std::cos((getRotation()
 sf::Vector2f CollisionBody::getRight(){ return sf::Vector2f(std::cos(getRotation() * (3.1415 / 180)), std::sin(getRotation() * (3.1415 / 180))); }
 
 bool CollisionBody::contains(sf::Vector2f point){
-    auto getAngle = [](float a, float b, float c){ return std::acos((a - b - c) / (-2 * b * c)); };
+    auto getAngle = [](float a, float b, float c){ return std::acos((b + c - a) / (2 * b * c)); };
+    auto inside = [](sf::Vector2f v1, sf::Vector2f v2, sf::Vector2f p){
+        unsigned int count = 0;
+
+        if((p.y < v1.y != p.y < v2.y) && (p.x < (v2.x - v1.x) * (p.y - v1.y) / (v2.y - v1.y) + v1.x)){
+           count++; 
+        }
+
+        return count % 2 != 0;
+    };
 
     for(Collider& c : colliders){
         float sum = 0.f;
@@ -44,25 +53,16 @@ bool CollisionBody::contains(sf::Vector2f point){
             // Get two endpoints for a triangle
             sf::Vector2f p1 = getTransform().transformPoint(c.getPoint(i));
             sf::Vector2f p2 = getTransform().transformPoint(c.getPoint((i + 1) % c.getPointCount()));
-
-            // Law of cosines requires the angle being found to be across of the wall
-            // Triangle will be formed from point to p1 to p2 and back to point
-            /*
-                    * Point
-                     / \
-                c   /   \  b
-                   /     \
-                  /       \
-              p2 *----a----* p1
-            */
-            float a = Math::distanceSquare(p1, p2);
-            float b = Math::distanceSquare(p2, point);
-            float c = Math::distanceSquare(point, p1);
-            sum += getAngle(a, b, c);
+            
+            if(inside(p1, p2, point)){
+                Interface::Renderer::drawPoint(point, 2.f, sf::Color::Cyan);
+            } else {
+                Interface::Renderer::drawPoint(point, 2.f, sf::Color::Red);
+            }
         }
 
         // If the point is inside this polygon, the sum will be greater than 2pi
-        if(sum >= 3.141592654 * 2){
+        if(sum >= 3.14159265358979323846 * 2){
             return true;
         }
     }

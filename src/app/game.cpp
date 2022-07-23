@@ -26,6 +26,10 @@ void Game::start(){
     r->velocity.x = 2500.f;
     r->mass = 10.f;
     engine.registerBody(r);
+
+    Phys::RigidBody* r2 = Phys::RigidBody::createBoxRigidBody(-550, -100, 500, 500);
+    r2->mStatic = true;
+    engine.registerBody(r2);
 }
 
 void Game::event(){

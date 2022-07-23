@@ -32,12 +32,19 @@ void Player::updateKeys(float deltaTime){
     // if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += rigidbody->getUp() * 1400.f * rigidbody->mass; }
     // if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += rigidbody->getUp() * -1400.f * rigidbody->mass; }
     
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->move(sf::Vector2f(-1.f, 0)); }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->move(sf::Vector2f(1.f, 0)); }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->move(sf::Vector2f(0, -1.f)); }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->move(sf::Vector2f(0, 1.f)); }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ rigidbody->rotate(-1.f); }
-    if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ rigidbody->rotate(1.f); }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->move(sf::Vector2f(-1.f, 0)); }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->move(sf::Vector2f(1.f, 0)); }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->move(sf::Vector2f(0, -1.f)); }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->move(sf::Vector2f(0, 1.f)); }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ rigidbody->rotate(-1.f); }
+    // if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ rigidbody->rotate(1.f); }
+    
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::A)){ rigidbody->force += sf::Vector2f(-1.f, 0) * 800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::D)){ rigidbody->force += sf::Vector2f(1.f, 0) * 800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::W)){ rigidbody->force += sf::Vector2f(0, -1.f) * 800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::S)){ rigidbody->force += sf::Vector2f(0, 1.f) * 800.f * rigidbody->mass; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::Q)){ rigidbody->torque += -1400.f; }
+    if(sf::Keyboard::isKeyPressed(sf::Keyboard::E)){ rigidbody->torque += 1400.f; }
 }
 
 // Vehicle functions

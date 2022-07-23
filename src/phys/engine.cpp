@@ -125,17 +125,18 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             sf::Vector2f p = b1->getPointOnCollider(id1, i);
             
             if(b2->contains(p)){
+                Interface::Renderer::drawPoint(p, 2.f, sf::Color::Cyan);
                 contacts.push_back(p);
             }
         }
 
-        for(unsigned int i = 0; i < c2.getPointCount(); i++){
-            sf::Vector2f p = b2->getPointOnCollider(id2, i);
+        // for(unsigned int i = 0; i < c2.getPointCount(); i++){
+        //     sf::Vector2f p = b2->getPointOnCollider(id2, i);
             
-            if(b1->contains(p)){
-                contacts.push_back(p);
-            }
-        }
+        //     if(b1->contains(p)){
+        //         contacts.push_back(p);
+        //     }
+        // }
 
         for(sf::Vector2f p : contacts){
             data.contactPoint += p;
