@@ -24,8 +24,9 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
     // Store collision
     CollisionData data = { body1, body2, sf::Vector2f(0, 0), INFINITY };
 
-    // Define functions
+    // Basic SAT implementation
     auto check = [](CollisionBody* b1, CollisionBody* b2, int id1, int id2, CollisionData& data, float scalar){
+        // SAT algorithm
         // Get colliders
         Collider& c1 = b1->getCollider(id1);
         Collider& c2 = b2->getCollider(id2);
@@ -34,7 +35,6 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         sf::Vector2f center2 = b2->getTransform().transformPoint(c2.getPosition());
         sf::Vector2f direction = (center2 - center1);
         sf::Vector2f normal;
-        std::vector<sf::Vector2f> contacts;
         float penetration = INFINITY;
 
         // Get every possible edge to check
@@ -121,50 +121,113 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
             normal *= -1.f;
         }
 
+        data.normal = normal;
+        data.displacement = penetration;
+
+        Interface::Renderer::drawLine(b1->getCenter(), b1->getCenter() + normal * -penetration);
+
+        return true;
+    };
+
+    // Incident and reference clipping to get the contact points
+    auto getManifold = [](CollisionBody* b1, CollisionBody* b2, int id1, int id2, sf::Vector2f normal, float penetration){
+        // Basic vars
+        Collider& c1 = b1->getCollider(id1);
+        Collider& c2 = b2->getCollider(id2);
+
+        // Start by finding the significant vertex, the point furthest along the normal
+        sf::Vector2f vertex1, vertex2;
+        unsigned int index1, index2 = 0;
+        float maxProj = -INFINITY;
+
         for(unsigned int i = 0; i < c1.getPointCount(); i++){
-            sf::Vector2f p = b1->getPointOnCollider(id1, i);
-            
-            if(b2->contains(p)){
-                Interface::Renderer::drawPoint(p, 2.f, sf::Color::Cyan);
-                contacts.push_back(p);
+            sf::Vector2f point = b1->getPointOnCollider(id1, i);
+            float proj = Math::dot(normal, point);
+
+            if(proj >= maxProj){
+                vertex1 = point;
+                index1 = i;
+                maxProj = proj;
+            }
+        }
+        
+        maxProj = -INFINITY;
+        for(unsigned int i = 0; i < c2.getPointCount(); i++){
+            sf::Vector2f point = b2->getPointOnCollider(id2, i);
+            float proj = Math::dot(-normal, point);
+
+            if(proj >= maxProj){
+                vertex2 = point;
+                index2 = i;
+                maxProj = proj;
             }
         }
 
-        // for(unsigned int i = 0; i < c2.getPointCount(); i++){
-        //     sf::Vector2f p = b2->getPointOnCollider(id2, i);
-            
-        //     if(b1->contains(p)){
-        //         contacts.push_back(p);
-        //     }
-        // }
+        // Find the two faces involved with contact
+        std::pair<sf::Vector2f, sf::Vector2f> possibleFaces1 = { b1->getPointOnCollider(id1, (index1 - 1) % c1.getPointCount()), b1->getPointOnCollider(id1, (index1 + 1) % c1.getPointCount()) };
+        std::pair<sf::Vector2f, sf::Vector2f> possibleFaces2 = { b2->getPointOnCollider(id2, (index2 - 1) % c2.getPointCount()), b2->getPointOnCollider(id2, (index2 + 1) % c2.getPointCount()) };
+        std::pair<sf::Vector2f, sf::Vector2f> possibleNormals1 = { Math::normalize(Math::perpendicular(possibleFaces1.first - vertex1)), Math::normalize(Math::perpendicular(possibleFaces1.second - vertex1)) };
+        std::pair<sf::Vector2f, sf::Vector2f> possibleNormals2 = { Math::normalize(Math::perpendicular(possibleFaces2.first - vertex2)), Math::normalize(Math::perpendicular(possibleFaces2.second - vertex2)) };
+        std::pair<sf::Vector2f, sf::Vector2f> significantFace1 = { vertex1, vertex1 };
+        std::pair<sf::Vector2f, sf::Vector2f> significantFace2 = { vertex2, vertex2 };
+        float collisionSlope = normal.y / normal.x;
 
-        for(sf::Vector2f p : contacts){
-            data.contactPoint += p;
+        // Decide the first of the two faces by checking which is more parallel to the normal
+        float slope1 = possibleNormals1.first.y / possibleNormals1.first.x;
+        float slope2 = possibleNormals1.second.y / possibleNormals1.second.x;
+        if(std::abs(slope1 - collisionSlope) <= std::abs(slope2 - collisionSlope)){
+            // The first face is more parallel
+            significantFace1.second = possibleFaces1.first;
+        } else {
+            // The second face is more parallel
+            significantFace1.second = possibleFaces1.second;
         }
 
-        data.normal = normal;
-        data.displacement = penetration;
-        data.contactPoint /= (float)contacts.size();
+        // Decide the second of the two faces by checking which is more parallel to the normal
+        slope1 = possibleNormals2.first.y / possibleNormals2.first.x;
+        slope2 = possibleNormals2.second.y / possibleNormals2.second.x;
+        if(std::abs(slope1 - collisionSlope) <= std::abs(slope2 - collisionSlope)){
+            // The first face is more parallel
+            significantFace2.second = possibleFaces2.first;
+        } else {
+            // The second face is more parallel
+            significantFace2.second = possibleFaces2.second;
+        }
 
-        Interface::Renderer::drawLine(b1->getCenter(), b1->getCenter() + normal * -penetration);
-        Interface::Renderer::drawPoint(data.contactPoint);
+        // Classify which face is the incident and which is the reference by calculating which of significantFaces are more parallel to the normal
+        std::pair<sf::Vector2f, sf::Vector2f> referenceFace, incidentFace;
+        slope1 = (significantFace1.second.y - significantFace1.first.y) / (significantFace1.second.y - significantFace1.first.y);
+        slope2 = (significantFace2.second.y - significantFace2.first.y) / (significantFace2.second.y - significantFace2.first.y);
+        if(std::abs(slope1 - collisionSlope) < std::abs(slope2 - collisionSlope)){
+            // The first face is more parallel, its the reference
+            referenceFace = significantFace1;
+            incidentFace = significantFace2;
+        } else {
+            // The second face is more parallel, its the reference
+            referenceFace = significantFace2;
+            incidentFace = significantFace1;
+        }
 
-        return true;
+        // Debug
+        Interface::Renderer::drawLine(referenceFace.first, referenceFace.second, sf::Color::Blue);
+        Interface::Renderer::drawLine(incidentFace.first, incidentFace.second, sf::Color::Red);
+        Interface::Renderer::drawPoint(incidentFace.first, 2.f, sf::Color::Red);
+        Interface::Renderer::drawPoint(incidentFace.second, 2.f, sf::Color::Red);
     };
 
     // Make sure there are enough bodies
     if(body1->getCollidersSize() == 0 || body2->getCollidersSize() == 0) return false;
 
-    // Commence check
-    bool collided = check(body1, body2, id1, id2, data, -1);
-    
-    if(collided){
+    // Commence final check
+    if(check(body1, body2, id1, id2, data, -1)){
         collisions.push_back(data);
 
-        Interface::Renderer::drawLine(data.contactPoint, data.contactPoint + data.normal * -data.displacement, sf::Color::Yellow);
+        getManifold(body1, body2, id1, id2, data.normal, data.displacement);
+
+        return true;
     }
 
-    return collided;
+    return false;
 }
 
 unsigned int Engine::registerBody(CollisionBody* c){
@@ -247,10 +310,10 @@ void Engine::collisionResolution(float deltaTime){
             if(!r2->mStatic){ r2->applyImpulse(impulse); }
 
             // Contact based impulses
-            for(unsigned int i = 0; i < 1/*data.contactPoints.size()*/; i++){
+            for(unsigned int i = 0; i < data.contactPoints.size(); i++){
                 // Rotational impulse
                 // Get radius for the point being hit
-                sf::Vector2f contact = data.contactPoint;
+                sf::Vector2f contact = data.contactPoints[i];
                 sf::Vector2f radius1 = contact - r1->getCenter();
                 sf::Vector2f radius2 = contact - r2->getCenter();
 
@@ -258,7 +321,7 @@ void Engine::collisionResolution(float deltaTime){
                 float rotationLoss = (std::pow(Math::cross(radius1, data.normal).z, 2) * (1.f / r1->inertia) + std::pow(Math::cross(radius2, data.normal).z, 2) * (1.f / r2->inertia));
                 sf::Vector2f rv = relativeVelocity + Math::cross(r2->rotVelocity * (3.1415f / 180), radius2) - Math::cross(r1->rotVelocity * (3.1415f / 180), radius1);
                 velocityProj = Math::dot(rv, data.normal);
-                scale = (-(1 + restitution) * velocityProj) / (massLoss + rotationLoss) / 1/*data.contactPoints.size()*/;
+                scale = (-(1 + restitution) * velocityProj) / (massLoss + rotationLoss) / data.contactPoints.size();
                 sf::Vector2f impulse = data.normal * scale;
 
                 Interface::Renderer::drawPoint(contact);
