@@ -65,6 +65,27 @@ namespace Phys {
         static RigidBody* createBoxRigidBody(float x, float y, float w, float h, float rotation = 0.f);
     };
 
+    struct Face {
+        sf::Vector2f start;
+        sf::Vector2f end;
+        
+        Face(sf::Vector2f start, sf::Vector2f end){
+            this->start = start;
+            this->end = end;
+        }
+        Face(){
+            start = sf::Vector2f(0, 0);
+            end = sf::Vector2f(0, 0);
+        }
+
+        sf::Vector2f getCenter(){ return (start + end) / 2.f; }
+        sf::Vector2f getNormal(){ return Math::normalize(Math::perpendicular(end - start)); }
+        float getSlope(){
+            sf::Vector2f n = getNormal();
+            return n.y / n.x;
+        }
+    };
+
     struct CollisionData {
         CollisionBody* c1;
         CollisionBody* c2;

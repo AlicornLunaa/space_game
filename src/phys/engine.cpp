@@ -164,55 +164,49 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         }
 
         // Find the two faces involved with contact
-        std::pair<sf::Vector2f, sf::Vector2f> possibleFaces1 = { b1->getPointOnCollider(id1, (index1 - 1) % c1.getPointCount()), b1->getPointOnCollider(id1, (index1 + 1) % c1.getPointCount()) };
-        std::pair<sf::Vector2f, sf::Vector2f> possibleFaces2 = { b2->getPointOnCollider(id2, (index2 - 1) % c2.getPointCount()), b2->getPointOnCollider(id2, (index2 + 1) % c2.getPointCount()) };
-        std::pair<sf::Vector2f, sf::Vector2f> possibleNormals1 = { Math::normalize(Math::perpendicular(possibleFaces1.first - vertex1)), Math::normalize(Math::perpendicular(possibleFaces1.second - vertex1)) };
-        std::pair<sf::Vector2f, sf::Vector2f> possibleNormals2 = { Math::normalize(Math::perpendicular(possibleFaces2.first - vertex2)), Math::normalize(Math::perpendicular(possibleFaces2.second - vertex2)) };
-        std::pair<sf::Vector2f, sf::Vector2f> significantFace1 = { vertex1, vertex1 };
-        std::pair<sf::Vector2f, sf::Vector2f> significantFace2 = { vertex2, vertex2 };
+        std::pair<Face, Face> possibleFaces1 = {
+            Face(vertex1, b1->getPointOnCollider(id1, (index1 - 1) % c1.getPointCount())),
+            Face(vertex1, b1->getPointOnCollider(id1, (index1 + 1) % c1.getPointCount()))
+        };
+        std::pair<Face, Face> possibleFaces2 = {
+            Face(vertex2, b2->getPointOnCollider(id2, (index2 - 1) % c2.getPointCount())),
+            Face(vertex2, b2->getPointOnCollider(id2, (index2 + 1) % c2.getPointCount()))
+        };
+        std::pair<Face, Face> significantFaces;
         float collisionSlope = normal.y / normal.x;
 
         // Decide the first of the two faces by checking which is more parallel to the normal
-        float slope1 = possibleNormals1.first.y / possibleNormals1.first.x;
-        float slope2 = possibleNormals1.second.y / possibleNormals1.second.x;
-        if(std::abs(slope1 - collisionSlope) <= std::abs(slope2 - collisionSlope)){
+        if(std::abs(possibleFaces1.first.getSlope() - collisionSlope) <= std::abs(possibleFaces1.second.getSlope() - collisionSlope)){
             // The first face is more parallel
-            significantFace1.second = possibleFaces1.first;
+            significantFaces.first = possibleFaces1.first;
         } else {
             // The second face is more parallel
-            significantFace1.second = possibleFaces1.second;
+            significantFaces.first = possibleFaces1.second;
         }
 
         // Decide the second of the two faces by checking which is more parallel to the normal
-        slope1 = possibleNormals2.first.y / possibleNormals2.first.x;
-        slope2 = possibleNormals2.second.y / possibleNormals2.second.x;
-        if(std::abs(slope1 - collisionSlope) <= std::abs(slope2 - collisionSlope)){
+        if(std::abs(possibleFaces2.first.getSlope() - collisionSlope) <= std::abs(possibleFaces2.second.getSlope() - collisionSlope)){
             // The first face is more parallel
-            significantFace2.second = possibleFaces2.first;
+            significantFaces.second = possibleFaces2.first;
         } else {
             // The second face is more parallel
-            significantFace2.second = possibleFaces2.second;
+            significantFaces.second = possibleFaces2.second;
         }
 
         // Classify which face is the incident and which is the reference by calculating which of significantFaces are more parallel to the normal
-        std::pair<sf::Vector2f, sf::Vector2f> referenceFace, incidentFace;
-        slope1 = (significantFace1.second.y - significantFace1.first.y) / (significantFace1.second.y - significantFace1.first.y);
-        slope2 = (significantFace2.second.y - significantFace2.first.y) / (significantFace2.second.y - significantFace2.first.y);
-        if(std::abs(slope1 - collisionSlope) < std::abs(slope2 - collisionSlope)){
+        Face referenceFace = significantFaces.first;
+        Face incidentFace = significantFaces.second;
+        if(std::abs(significantFaces.first.getSlope() - collisionSlope) < std::abs(significantFaces.second.getSlope() - collisionSlope)){
             // The first face is more parallel, its the reference
-            referenceFace = significantFace1;
-            incidentFace = significantFace2;
-        } else {
-            // The second face is more parallel, its the reference
-            referenceFace = significantFace2;
-            incidentFace = significantFace1;
+            referenceFace = significantFaces.second;
+            incidentFace = significantFaces.first;
         }
 
         // Debug
-        Interface::Renderer::drawLine(referenceFace.first, referenceFace.second, sf::Color::Blue);
-        Interface::Renderer::drawLine(incidentFace.first, incidentFace.second, sf::Color::Red);
-        Interface::Renderer::drawPoint(incidentFace.first, 2.f, sf::Color::Red);
-        Interface::Renderer::drawPoint(incidentFace.second, 2.f, sf::Color::Red);
+        Interface::Renderer::drawLine(referenceFace.start, referenceFace.end, sf::Color::Blue);
+        Interface::Renderer::drawLine(incidentFace.start, incidentFace.end, sf::Color::Red);
+        Interface::Renderer::drawPoint(incidentFace.start, 2.f, sf::Color::Red);
+        Interface::Renderer::drawPoint(incidentFace.end, 2.f, sf::Color::Red);
     };
 
     // Make sure there are enough bodies
