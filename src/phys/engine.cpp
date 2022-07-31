@@ -176,7 +176,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         float collisionSlope = normal.y / normal.x;
 
         // Decide the first of the two faces by checking which is more parallel to the normal
-        if(std::abs(possibleFaces1.first.getSlope() - collisionSlope) <= std::abs(possibleFaces1.second.getSlope() - collisionSlope)){
+        if(std::abs(Math::slope(possibleFaces1.first.getNormal()) - collisionSlope) <= std::abs(Math::slope(possibleFaces1.second.getNormal()) - collisionSlope)){
             // The first face is more parallel
             significantFaces.first = possibleFaces1.first;
         } else {
@@ -185,7 +185,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         }
 
         // Decide the second of the two faces by checking which is more parallel to the normal
-        if(std::abs(possibleFaces2.first.getSlope() - collisionSlope) <= std::abs(possibleFaces2.second.getSlope() - collisionSlope)){
+        if(std::abs(Math::slope(possibleFaces2.first.getNormal()) - collisionSlope) <= std::abs(Math::slope(possibleFaces2.second.getNormal()) - collisionSlope)){
             // The first face is more parallel
             significantFaces.second = possibleFaces2.first;
         } else {
@@ -196,7 +196,7 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         // Classify which face is the incident and which is the reference by calculating which of significantFaces are more parallel to the normal
         Face referenceFace = significantFaces.first;
         Face incidentFace = significantFaces.second;
-        if(std::abs(significantFaces.first.getSlope() - collisionSlope) < std::abs(significantFaces.second.getSlope() - collisionSlope)){
+        if(std::abs(Math::slope(significantFaces.first.getNormal()) - collisionSlope) < std::abs(Math::slope(significantFaces.second.getNormal()) - collisionSlope)){
             // The first face is more parallel, its the reference
             referenceFace = significantFaces.second;
             incidentFace = significantFaces.first;
@@ -205,6 +205,16 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         // Adjacent faces to the reference are required for the algorithm, first is counter clockwise, second clockwise
         std::pair<Face, Face> adjacentFaces = referenceFace.getAdjacents();
 
+        // Clip the incident vertices to the reference face adjacents
+        sf::Vector2f incident1 = adjacentFaces.first.project(incidentFace, incidentFace.start);
+        sf::Vector2f incident2 = adjacentFaces.first.project(incidentFace, incidentFace.end);
+        Interface::Renderer::drawPoint(incident1, 2.f, sf::Color::Yellow);
+        Interface::Renderer::drawPoint(incident2, 2.f, sf::Color::Yellow);
+        sf::Vector2f incident3 = adjacentFaces.second.project(incidentFace, incidentFace.start);
+        sf::Vector2f incident4 = adjacentFaces.second.project(incidentFace, incidentFace.end);
+        Interface::Renderer::drawPoint(incident3, 2.f, sf::Color::Cyan);
+        Interface::Renderer::drawPoint(incident4, 2.f, sf::Color::Cyan);
+
         // Debug
         Interface::Renderer::drawLine(referenceFace.start, referenceFace.end, sf::Color::Blue);
         Interface::Renderer::drawLine(adjacentFaces.first.start, adjacentFaces.first.end, sf::Color::Yellow);
@@ -212,17 +222,6 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         Interface::Renderer::drawLine(incidentFace.start, incidentFace.end, sf::Color::Red);
         Interface::Renderer::drawPoint(incidentFace.start, 2.f, sf::Color::Red);
         Interface::Renderer::drawPoint(incidentFace.end, 2.f, sf::Color::Red);
-
-        Interface::Renderer::drawText(referenceFace.start.x, referenceFace.start.y, std::to_string(referenceFace.startIndex));
-        Interface::Renderer::drawText(referenceFace.end.x, referenceFace.end.y, std::to_string(referenceFace.endIndex));
-
-        Interface::Renderer::drawText(adjacentFaces.first.end.x, adjacentFaces.first.end.y, std::to_string(adjacentFaces.first.endIndex), 24u, sf::Color::Red);
-        Interface::Renderer::drawText(adjacentFaces.second.end.x, adjacentFaces.second.end.y, std::to_string(adjacentFaces.second.endIndex), 24u, sf::Color::Red);
-
-        Interface::Renderer::drawPoint(adjacentFaces.first.start, 2.f, sf::Color::Cyan);
-        Interface::Renderer::drawPoint(adjacentFaces.first.end, 2.f, sf::Color::Cyan);
-        Interface::Renderer::drawPoint(adjacentFaces.second.start, 2.f, sf::Color::Magenta);
-        Interface::Renderer::drawPoint(adjacentFaces.second.end, 2.f, sf::Color::Magenta);
     };
 
     // Make sure there are enough bodies

@@ -105,3 +105,90 @@ RigidBody* RigidBody::createBoxRigidBody(float x, float y, float w, float h, flo
 
     return rb;
 }
+
+// Face structure
+Face::Face(CollisionBody* body, int collider, int startIndex, int endIndex){
+    this->body = body;
+    this->collider = collider;
+    this->startIndex = startIndex;
+    this->endIndex = endIndex;
+
+    if(startIndex > endIndex){
+        this->startIndex = endIndex;
+        this->endIndex = startIndex;
+    }
+    
+    start = body->getPointOnCollider(collider, this->startIndex);
+    end = body->getPointOnCollider(collider, this->endIndex);
+
+    if(this->endIndex - this->startIndex > 1){
+        adjacentStart = (this->startIndex + 1) % body->getCollider(collider).getPointCount();
+        adjacentEnd = (this->endIndex - 1) % body->getCollider(collider).getPointCount();
+    } else {
+        adjacentStart = (this->startIndex - 1) % body->getCollider(collider).getPointCount();
+        adjacentEnd = (this->endIndex + 1) % body->getCollider(collider).getPointCount();
+    }
+}
+Face::Face(sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex, int adjacentStart, int adjacentEnd){
+    this->start = start;
+    this->end = end;
+    this->startIndex = startIndex;
+    this->endIndex = endIndex;
+    this->adjacentStart = adjacentStart;
+    this->adjacentEnd = adjacentEnd;
+}
+Face::Face(sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex){
+    this->start = start;
+    this->end = end;
+    this->startIndex = startIndex;
+    this->endIndex = endIndex;
+}
+Face::Face(sf::Vector2f start, sf::Vector2f end){
+    this->start = start;
+    this->end = end;
+    this->startIndex = -1;
+    this->endIndex = -1;
+}
+Face::Face(){
+    start = sf::Vector2f(0, 0);
+    end = sf::Vector2f(0, 0);
+    this->startIndex = -1;
+    this->endIndex = -1;
+}
+
+sf::Vector2f Face::getCenter(){ return (start + end) / 2.f; }
+sf::Vector2f Face::getNormal(){ return Math::normalize(Math::perpendicular(end - start)); }
+float Face::getSlope(){ return (end.y - start.y) / (end.x - start.x); }
+std::pair<Face, Face> Face::getAdjacents(){
+    return {
+        Face(start, body->getPointOnCollider(collider, adjacentStart), startIndex, adjacentStart),
+        Face(end, body->getPointOnCollider(collider, adjacentEnd), endIndex, adjacentEnd)
+    };
+}
+sf::Vector2f Face::project(Face face, sf::Vector2f point){
+    /* Equations
+        * x = (-m2 * x2 + y2 + m1 * x1 - y1) / (m1 - m2)
+        * y = m1(x - x1) + y1
+        */
+    // Projected point
+    float m1 = getSlope();
+    float m2 = face.getSlope();
+    float x = ((-m2 * face.start.x) + face.start.y + (m1 * start.x) - start.y) / (m1 - m2);
+    float y = (m1 * (x - start.x)) + start.y;
+
+    // Edge-case for a slope being vertical, aka infinite
+    
+
+    // Check clip edge using inequality
+    if(point.y <= (m1 * (point.x - face.start.x)) + face.start.y){
+        //! Fix
+        return sf::Vector2f(x, y);
+    }
+
+    return point;
+}
+void Face::draw(sf::Color color){
+    Interface::Renderer::drawLine(start, end, color);
+    Interface::Renderer::drawPoint(start, 2.f, color);
+    Interface::Renderer::drawPoint(end, 2.f, color);
+}

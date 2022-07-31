@@ -72,4 +72,11 @@ namespace Math {
      * @return bool
      */
     bool clipPoint(sf::Vector2f edgeStart, sf::Vector2f edgeEnd, sf::Vector2f point, bool flip);
+
+    /**
+     * @brief Gets the slope of the vector
+     * @param v 
+     * @return float 
+     */
+    float slope(sf::Vector2f v);
 }

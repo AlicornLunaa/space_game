@@ -58,3 +58,7 @@ bool Math::clipPoint(sf::Vector2f edgeStart, sf::Vector2f edgeEnd, sf::Vector2f 
     float product = (slope * (point.x - edgeStart.x)) + edgeStart.y;
     return (flip ? (product - point.y) <= 0 : (product - point.y) >= 0);
 }
+
+float Math::slope(sf::Vector2f v){
+    return v.y / v.x;
+}
