@@ -6,6 +6,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <array>
 #include <SFML/Graphics.hpp>
 #include "../interface/renderer.h"
 #include "../phys/physics.h"

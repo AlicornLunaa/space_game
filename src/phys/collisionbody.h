@@ -4,6 +4,7 @@
  * @brief A body to have physics calculations applied to
  */
 #pragma once
+#include <iostream>
 #include <SFML/System.hpp>
 #include "colliders.h"
 #include "../util/vec_math.h"
@@ -66,16 +67,60 @@ namespace Phys {
     };
 
     struct Face {
-        sf::Vector2f start;
-        sf::Vector2f end;
+        CollisionBody* body;
+        int collider;
+
+        sf::Vector2f start, end;
+        int startIndex, endIndex;
+        int adjacentStart, adjacentEnd;
         
+        Face(CollisionBody* body, int collider, int startIndex, int endIndex){
+            this->body = body;
+            this->collider = collider;
+            this->startIndex = startIndex;
+            this->endIndex = endIndex;
+
+            if(startIndex > endIndex){
+                this->startIndex = endIndex;
+                this->endIndex = startIndex;
+            }
+            
+            start = body->getPointOnCollider(collider, this->startIndex);
+            end = body->getPointOnCollider(collider, this->endIndex);
+
+            if(this->endIndex - this->startIndex > 1){
+                adjacentStart = (this->startIndex + 1) % body->getCollider(collider).getPointCount();
+                adjacentEnd = (this->endIndex - 1) % body->getCollider(collider).getPointCount();
+            } else {
+                adjacentStart = (this->startIndex - 1) % body->getCollider(collider).getPointCount();
+                adjacentEnd = (this->endIndex + 1) % body->getCollider(collider).getPointCount();
+            }
+        }
+        Face(sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex, int adjacentStart, int adjacentEnd){
+            this->start = start;
+            this->end = end;
+            this->startIndex = startIndex;
+            this->endIndex = endIndex;
+            this->adjacentStart = adjacentStart;
+            this->adjacentEnd = adjacentEnd;
+        }
+        Face(sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex){
+            this->start = start;
+            this->end = end;
+            this->startIndex = startIndex;
+            this->endIndex = endIndex;
+        }
         Face(sf::Vector2f start, sf::Vector2f end){
             this->start = start;
             this->end = end;
+            this->startIndex = -1;
+            this->endIndex = -1;
         }
         Face(){
             start = sf::Vector2f(0, 0);
             end = sf::Vector2f(0, 0);
+            this->startIndex = -1;
+            this->endIndex = -1;
         }
 
         sf::Vector2f getCenter(){ return (start + end) / 2.f; }
@@ -83,6 +128,12 @@ namespace Phys {
         float getSlope(){
             sf::Vector2f n = getNormal();
             return n.y / n.x;
+        }
+        std::pair<Face, Face> getAdjacents(){
+            return {
+                Face(start, body->getPointOnCollider(collider, adjacentStart), startIndex, adjacentStart),
+                Face(end, body->getPointOnCollider(collider, adjacentEnd), endIndex, adjacentEnd)
+            };
         }
     };
 
