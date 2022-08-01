@@ -195,7 +195,9 @@ sf::Vector2f Face::project(Face face, sf::Vector2f point){
     Interface::Renderer::drawPlane((this->start + this->end) / 2.f, this->getNormal(), sf::Color(200, 50, 50, 50));
 
     // Check clip edge using inequality
-    if((start.x >= end.x && point.y <= (m2 * (point.x - face.start.x)) + face.start.y) || (start.x <= end.x && point.y >= (m2 * (point.x - face.start.x)) + face.start.y)){
+    float product = (m1 * (point.x - start.x) + start.y);
+
+    if((start.x >= end.x && point.y <= product) || (start.x <= end.x && point.y >= product)){
         return sf::Vector2f(x, y);
     }
 
