@@ -4,8 +4,10 @@
  * @brief This class holds functions to draw things to the screen without constructing SFML objects every time
  */
 #pragma once
+#include <cmath>
 #include <assert.h>
 #include <SFML/Graphics.hpp>
+#include "../util/vec_math.h"
 
 namespace Interface {
     
@@ -72,6 +74,15 @@ namespace Interface {
          */
         static void drawPoint(float x, float y, float radius = 2.f, sf::Color color = sf::Color::White);
         static void drawPoint(sf::Vector2f v, float radius = 2.f, sf::Color color = sf::Color::White);
+
+        /**
+         * @brief Draws a plane across the screen
+         * 
+         * @param point 
+         * @param direction 
+         * @param color 
+         */
+        static void drawPlane(sf::Vector2f point, sf::Vector2f direction, sf::Color color = sf::Color::White);
     };
 
 };

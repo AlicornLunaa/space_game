@@ -85,3 +85,18 @@ void Renderer::drawPoint(float x, float y, float radius, sf::Color color){
 void Renderer::drawPoint(sf::Vector2f v, float radius, sf::Color color){
     drawPoint(v.x, v.y, radius, color);
 }
+
+void Renderer::drawPlane(sf::Vector2f point, sf::Vector2f direction, sf::Color color){
+    // Make sure window exists
+    assert(window != nullptr);
+
+    // Set rectangle properties
+    rect.setPosition(point - Math::perpendicular(direction) * 500.f);
+    rect.setSize(sf::Vector2f(1000, 1000));
+    rect.setRotation(std::atan2(direction.y, direction.x) * (180 / 3.14) + 90.f);
+
+    rect.setOutlineThickness(0.f);
+    rect.setFillColor(color);
+
+    window->draw(rect);
+}

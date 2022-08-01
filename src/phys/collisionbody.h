@@ -75,9 +75,9 @@ namespace Phys {
         int adjacentStart, adjacentEnd;
         
         Face(CollisionBody* body, int collider, int startIndex, int endIndex);
-        Face(sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex, int adjacentStart, int adjacentEnd);
-        Face(sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex);
-        Face(sf::Vector2f start, sf::Vector2f end);
+        Face(CollisionBody* body, int collider, sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex, int adjacentStart, int adjacentEnd);
+        Face(CollisionBody* body, int collider, sf::Vector2f start, sf::Vector2f end, int startIndex, int endIndex);
+        Face(CollisionBody* body, int collider, sf::Vector2f start, sf::Vector2f end);
         Face();
 
         sf::Vector2f getCenter();

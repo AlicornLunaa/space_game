@@ -21,6 +21,7 @@ void Game::start(){
     // planetManager.registerPlanet(new Objects::Planet(engine, 0, 2 * 1024 + 100, 2.f, 1024));
     player.create(engine, 100, -1024);
     ship = new Vehicles::Ship(engine, 0, -1024);
+    ship->rotate(15.f);
 
     Phys::RigidBody* r = Phys::RigidBody::createBoxRigidBody(-500, -100, 50, 50);
     r->velocity.x = 2500.f;

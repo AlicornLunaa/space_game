@@ -220,8 +220,8 @@ bool Engine::collidesSAT(CollisionBody* body1, CollisionBody* body2, int id1, in
         Interface::Renderer::drawLine(adjacentFaces.first.start, adjacentFaces.first.end, sf::Color::Yellow);
         Interface::Renderer::drawLine(adjacentFaces.second.start, adjacentFaces.second.end, sf::Color::Yellow);
         Interface::Renderer::drawLine(incidentFace.start, incidentFace.end, sf::Color::Red);
-        Interface::Renderer::drawPoint(incidentFace.start, 2.f, sf::Color::Red);
-        Interface::Renderer::drawPoint(incidentFace.end, 2.f, sf::Color::Red);
+        // Interface::Renderer::drawPoint(incidentFace.start, 2.f, sf::Color::Red);
+        // Interface::Renderer::drawPoint(incidentFace.end, 2.f, sf::Color::Red);
     };
 
     // Make sure there are enough bodies
